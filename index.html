@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -1041,6 +1041,1141 @@ function bindEvents(){
   const al=document.createElement('link');al.rel='apple-touch-icon';al.href=i192;document.head.appendChild(al);
   if('serviceWorker' in navigator){
     const sw=`const C='mba-tt-v4';self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));});`;
+    navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
+  }
+})();
+
+if(localStorage.getItem('theme')==='light')dark=false;
+render();
+</script>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="theme-color" content="#6366f1"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>MBA Timetable</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',system-ui,sans-serif;font-size:15px;overscroll-behavior:none;-webkit-font-smoothing:antialiased}
+
+/* ── DARK THEME (default) ── */
+:root{
+  --bg:#0d0f1a;
+  --card:#141624;
+  --card2:#1a1e30;
+  --border:#252840;
+  --text:#f0f2ff;
+  --text2:#a8b4cc;
+  --text3:#6b7a94;
+  --accent:#6c6ff5;
+  --accent-dim:#6c6ff520;
+  --accent-border:#6c6ff540;
+  --green:#22c55e;
+  --green-dim:#22c55e18;
+  --yellow:#f59e0b;
+  --yellow-dim:#f59e0b18;
+  --red:#f43f5e;
+  --red-dim:#f43f5e18;
+  --input-bg:#1a1e30;
+  --shadow:0 2px 12px rgba(0,0,0,.4);
+}
+body.light{
+  --bg:#f4f6fb;
+  --card:#ffffff;
+  --card2:#f0f2f8;
+  --border:#e4e8f0;
+  --text:#111827;
+  --text2:#4b5563;
+  --text3:#9ca3af;
+  --accent:#5b5ef0;
+  --accent-dim:#5b5ef010;
+  --accent-border:#5b5ef030;
+  --green:#16a34a;
+  --green-dim:#16a34a12;
+  --yellow:#d97706;
+  --yellow-dim:#d9770612;
+  --red:#e11d48;
+  --red-dim:#e11d4812;
+  --input-bg:#f4f6fb;
+  --shadow:0 2px 12px rgba(0,0,0,.08);
+}
+body{background:var(--bg);color:var(--text);transition:background .25s,color .25s}
+.app{max-width:430px;margin:0 auto;min-height:100vh;position:relative}
+
+/* ── HEADER ── */
+.hdr{background:var(--card);border-bottom:1px solid var(--border);padding:14px 16px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.hdr-title{font-size:17px;font-weight:800;color:var(--accent);letter-spacing:-.3px}
+.hdr-sub{font-size:12px;color:var(--text3);margin-top:2px;font-weight:500}
+.hdr-btns{display:flex;gap:6px;align-items:center}
+.icon-btn{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:7px 12px;cursor:pointer;font-size:13px;color:var(--text2);font-weight:600;transition:all .2s;white-space:nowrap}
+.icon-btn:active{transform:scale(.96)}
+
+/* ── BOTTOM NAV ── */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:200;padding-bottom:env(safe-area-inset-bottom)}
+.nav-btn{flex:1;padding:10px 0 8px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.nav-ico{font-size:19px;line-height:1}
+.nav-lbl{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.2px;margin-top:1px}
+.nav-lbl.on{color:var(--accent)}
+.nav-bar{width:20px;height:3px;border-radius:3px;background:var(--accent);margin-top:2px}
+
+/* ── CONTENT ── */
+.content{padding:16px 14px 90px}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.card+.card,.card+.class-card,.class-card+.card,.class-card+.class-card{margin-top:10px}
+
+/* ── STAT ROW ── */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 8px 12px;text-align:center;box-shadow:var(--shadow)}
+.stat-n{font-size:26px;font-weight:800;color:var(--accent);line-height:1;margin:4px 0 3px}
+.stat-ico{font-size:18px}
+.stat-lbl{font-size:11px;color:var(--text3);font-weight:600}
+
+/* ── CLASS CARD ── */
+.class-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 14px 12px;border-left:4px solid transparent;box-shadow:var(--shadow)}
+.cc-name{font-size:14px;font-weight:700;color:var(--text);line-height:1.35;margin-bottom:6px}
+.cc-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.cc-time{font-size:15px;font-weight:800;color:var(--accent)}
+.cc-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.pill{border-radius:20px;padding:3px 9px;font-size:11px;font-weight:700;display:inline-block;letter-spacing:.2px}
+.att-row{display:flex;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.att-btn{flex:1;border:1.5px solid;border-radius:10px;padding:8px 4px;cursor:pointer;font-size:11px;font-weight:700;transition:all .2s;text-align:center}
+.btn-p{background:var(--green-dim);color:var(--green);border-color:var(--green)}
+.btn-p.dim{opacity:.38}
+.btn-a{background:var(--red-dim);color:var(--red);border-color:var(--red)}
+.btn-a.dim{opacity:.38}
+.btn-c{background:#ffffff10;color:var(--text3);border-color:var(--border)}
+.btn-c.dim{opacity:.38}
+.att-btn:active{transform:scale(.96)}
+.clear-btn{font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-weight:600;padding:4px 0 0;display:block;margin:0 auto;text-decoration:underline;text-underline-offset:2px}
+.disc{font-size:11px;color:var(--yellow);background:var(--yellow-dim);border:1px solid var(--yellow);border-radius:8px;padding:8px 10px;margin-bottom:10px;line-height:1.5}
+.break-sep{text-align:center;color:var(--text3);font-size:12px;margin:10px 0;display:flex;align-items:center;gap:8px}
+.break-sep::before,.break-sep::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── WEEK STRIP ── */
+.week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.wd{text-align:center;cursor:pointer;border-radius:12px;padding:8px 2px 6px;border:1px solid var(--border);transition:all .15s}
+.wd:active{transform:scale(.93)}
+.wd-day{font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.wd-num{font-size:15px;font-weight:800;color:var(--text);margin:3px 0}
+.wd-dot{font-size:11px;font-weight:700;color:var(--accent)}
+
+/* ── CALENDAR ── */
+.cal-hdr-row{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px}
+.cal-hdr-cell{text-align:center;font-size:11px;font-weight:700;color:var(--text3);padding:4px 0;letter-spacing:.3px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-cell{border-radius:10px;border:1.5px solid var(--border);cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5px 1px;min-height:44px}
+.cal-cell:active{transform:scale(.93)}
+.cal-num{font-size:13px;font-weight:800;color:var(--text)}
+.cal-badge{font-size:9px;font-weight:800;background:var(--accent);color:#fff;border-radius:20px;padding:1px 5px;margin-top:2px;white-space:nowrap}
+.cal-hint{font-size:9px;margin-top:2px}
+
+/* ── NAV ARROWS ── */
+.nav-arrows{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.arr{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 14px;cursor:pointer;color:var(--text);font-size:18px;font-weight:700;transition:all .15s}
+.arr:active{transform:scale(.93)}
+.nav-mid{flex:1;text-align:center}
+.nav-mid-title{font-size:15px;font-weight:800;color:var(--text)}
+.nav-mid-sub{font-size:12px;color:var(--accent);font-weight:700;margin-top:2px}
+.today-btn{display:block;margin:0 auto 16px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:20px;padding:7px 20px;color:var(--accent);font-weight:700;font-size:13px;cursor:pointer;transition:all .2s}
+.today-btn:active{transform:scale(.96)}
+.badge{background:var(--accent-dim);color:var(--accent);border-radius:20px;padding:2px 9px;font-size:12px;margin-left:6px;font-weight:700}
+
+/* ── SECTION LABEL ── */
+.sec-lbl{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+
+/* ── ALERT BOX ── */
+.alert{border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:13px;font-weight:600;text-align:center}
+
+/* ── ATTENDANCE ── */
+.att-overall{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center;box-shadow:var(--shadow);margin-bottom:12px}
+.att-pct{font-size:52px;font-weight:900;line-height:1;letter-spacing:-2px}
+.att-pct-sub{font-size:13px;color:var(--text3);margin-top:6px}
+.att-prog{height:10px;background:var(--border);border-radius:10px;overflow:hidden;margin:14px 0 6px}
+.att-prog-fill{height:100%;border-radius:10px;transition:width .6s}
+.att-prog-marks{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);padding:0 2px}
+.att-mini-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.att-mini{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow)}
+.att-mini-n{font-size:22px;font-weight:800;margin-top:3px}
+.att-mini-lbl{font-size:11px;color:var(--text3);font-weight:600;margin-bottom:2px}
+.subj-row{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px;box-shadow:var(--shadow)}
+.subj-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.subj-name{font-size:13px;font-weight:700;color:var(--text)}
+.subj-pct{font-size:18px;font-weight:800}
+.subj-bar-bg{height:8px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:6px}
+.subj-bar-fill{height:100%;border-radius:8px;transition:width .5s}
+.subj-counts{display:flex;gap:12px;font-size:11px;color:var(--text3)}
+.recent-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border)}
+.recent-row:last-child{border-bottom:none}
+
+/* ── ANALYTICS ── */
+.ana-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.ana-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.ana-ico{font-size:20px;margin-bottom:6px}
+.ana-n{font-size:22px;font-weight:800;color:var(--accent)}
+.ana-lbl{font-size:11px;color:var(--text3);font-weight:600;margin-top:2px}
+
+/* ── ONBOARDING ── */
+.onboard{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px;background:var(--bg)}
+.ob-card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:28px 22px;width:100%;max-width:400px;box-shadow:var(--shadow)}
+.ob-title{font-size:24px;font-weight:800;color:var(--accent);margin-bottom:6px}
+.ob-sub{font-size:13px;color:var(--text3);margin-bottom:24px;line-height:1.6}
+.ob-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px}
+.ob-input{width:100%;padding:13px 15px;border-radius:12px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text);font-size:16px;outline:none;transition:border-color .2s}
+.ob-input:focus{border-color:var(--accent)}
+.ob-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.ob-chip{padding:11px 10px;border-radius:12px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;text-align:left;transition:all .2s;user-select:none}
+.ob-chip.sel{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+.ob-chip:active{transform:scale(.96)}
+.ob-chip-title{font-size:13px;font-weight:700;pointer-events:none}
+.ob-chip-sub{font-size:10px;margin-top:3px;opacity:.8;pointer-events:none}
+.sec-sel{width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid var(--accent);background:var(--input-bg);color:var(--text);font-size:13px;font-weight:600;outline:none;margin-top:8px;pointer-events:auto}
+.ob-btn{width:100%;padding:14px;border-radius:13px;border:none;background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px;transition:all .2s}
+.ob-btn:disabled{opacity:.35;cursor:not-allowed}
+.ob-btn:not(:disabled):active{transform:scale(.97)}
+.ob-btn.sec{background:var(--card2);color:var(--text2);border:1px solid var(--border)}
+
+/* ── EDIT PROFILE MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+.sheet{background:var(--card);border-radius:22px 22px 0 0;padding:20px 18px 36px;width:100%;max-width:430px;max-height:88vh;overflow-y:auto;box-shadow:0 -4px 40px rgba(0,0,0,.5)}
+.sheet-handle{width:40px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 18px}
+.sheet-title{font-size:18px;font-weight:800;margin-bottom:4px}
+.sheet-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
+
+/* ── ADMIN ── */
+.admin-wrap{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px;background:var(--bg)}
+.admin-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:26px 20px;width:100%;max-width:420px;box-shadow:var(--shadow)}
+.admin-title{font-size:19px;font-weight:800;color:var(--accent);margin-bottom:4px}
+.admin-sub{font-size:12px;color:var(--text3);margin-bottom:18px}
+.admin-input{width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text);font-size:14px;outline:none;margin-bottom:10px;transition:border-color .2s}
+.admin-input:focus{border-color:var(--accent)}
+.admin-btn{width:100%;padding:13px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;transition:all .2s}
+.admin-btn:disabled{opacity:.35;cursor:not-allowed}
+.admin-btn.danger{background:var(--red)}
+.admin-btn.sec{background:var(--card2);color:var(--text2);border:1px solid var(--border)}
+.sync-msg{font-size:12px;padding:10px 12px;border-radius:10px;margin-bottom:10px;font-weight:600}
+.sync-ok{background:var(--green-dim);color:var(--green);border:1px solid var(--green)}
+.sync-err{background:var(--red-dim);color:var(--red);border:1px solid var(--red)}
+.sync-info{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border)}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:5px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.preview-tbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:6px;display:block;overflow-x:auto}
+.preview-tbl th{background:var(--card2);padding:6px 8px;text-align:left;font-weight:700}
+.preview-tbl td{padding:5px 8px;border-bottom:1px solid var(--border)}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+
+/* ── WEEKLY DAY CARDS ── */
+.week-day-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px;cursor:pointer;box-shadow:var(--shadow);transition:all .15s}
+.week-day-card:active{transform:scale(.98)}
+
+/* ── NEXT CLASS HIGHLIGHT ── */
+.next-box{background:linear-gradient(135deg,var(--accent-dim),transparent);border:1.5px solid var(--accent-border);border-radius:16px;padding:14px;margin-bottom:14px}
+.next-label{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+/* ── DATA ── */
+const ALL_SUBJECTS={
+  "DMEC-A":{name:"Digital Marketing & E-Commerce",short:"DMEC",color:"#f59e0b",course:"DMEC",section:"A"},
+  "DMEC-B":{name:"Digital Marketing & E-Commerce",short:"DMEC",color:"#f59e0b",course:"DMEC",section:"B"},
+  "DMEC-C":{name:"Digital Marketing & E-Commerce",short:"DMEC",color:"#f59e0b",course:"DMEC",section:"C"},
+  "BM-A":{name:"Brand Management",short:"BM",color:"#ec4899",course:"BM",section:"A"},
+  "BM-B":{name:"Brand Management",short:"BM",color:"#ec4899",course:"BM",section:"B"},
+  "BM-C":{name:"Brand Management",short:"BM",color:"#ec4899",course:"BM",section:"C"},
+  "DDM-A":{name:"Data Driven Marketing",short:"DDM",color:"#14b8a6",course:"DDM",section:"A"},
+  "DDM-B":{name:"Data Driven Marketing",short:"DDM",color:"#14b8a6",course:"DDM",section:"B"},
+  "CMNS-A":{name:"Conflict Mgmt & Negotiation",short:"CMNS",color:"#f97316",course:"CMNS",section:"A"},
+  "CMNS-B":{name:"Conflict Mgmt & Negotiation",short:"CMNS",color:"#f97316",course:"CMNS",section:"B"},
+  "CSG-A":{name:"Competitive Strategy & Growth",short:"CSG",color:"#06b6d4",course:"CSG",section:"A"},
+  "CSG-B":{name:"Competitive Strategy & Growth",short:"CSG",color:"#06b6d4",course:"CSG",section:"B"},
+  "MC-A":{name:"Management Consulting",short:"MC",color:"#8b5cf6",course:"MC",section:"A"},
+  "MC-B":{name:"Management Consulting",short:"MC",color:"#8b5cf6",course:"MC",section:"B"},
+  "EOSC-A":{name:"Economics of Strategy",short:"EoSC",color:"#3b82f6",course:"EOSC",section:"A"},
+  "EOSC-B":{name:"Economics of Strategy",short:"EoSC",color:"#3b82f6",course:"EOSC",section:"B"},
+  "BDMDM-A":{name:"Business Data Mining",short:"BDMDM",color:"#6366f1",course:"BDMDM",section:"A"},
+  "BDMDM-B":{name:"Business Data Mining",short:"BDMDM",color:"#6366f1",course:"BDMDM",section:"B"},
+  "FD-A":{name:"Financial Derivatives",short:"FD",color:"#84cc16",course:"FD",section:"A"},
+  "FD-B":{name:"Financial Derivatives",short:"FD",color:"#84cc16",course:"FD",section:"B"},
+  "CV-A":{name:"Corporate Valuation",short:"CV",color:"#a78bfa",course:"CV",section:"A"},
+  "CV-B":{name:"Corporate Valuation",short:"CV",color:"#a78bfa",course:"CV",section:"B"},
+  "SCM-A":{name:"Supply Chain Management",short:"SCM",color:"#fb923c",course:"SCM",section:"A"},
+  "SCM-B":{name:"Supply Chain Management",short:"SCM",color:"#fb923c",course:"SCM",section:"B"},
+  "FT":{name:"Fin-Tech",short:"FT",color:"#10b981",course:"FT",section:""},
+  "FSA":{name:"Financial Statement Analysis",short:"FSA",color:"#f43f5e",course:"FSA",section:""},
+  "MFSM":{name:"Mgmt of Financial Services",short:"MFSM",color:"#e879f9",course:"MFSM",section:""},
+  "WEI":{name:"The World Economy and India",short:"WEI",color:"#0ea5e9",course:"WEI",section:""},
+  "MPA":{name:"Managerial Predictive Analytics",short:"MPA",color:"#d946ef",course:"MPA",section:""},
+  "SOP":{name:"Sales & Operations Planning",short:"SOP",color:"#22d3ee",course:"SOP",section:""},
+};
+const CWS={"DMEC":["A","B","C"],"BM":["A","B","C"],"DDM":["A","B"],"CMNS":["A","B"],"CSG":["A","B"],"MC":["A","B"],"EOSC":["A","B"],"BDMDM":["A","B"],"FD":["A","B"],"CV":["A","B"],"SCM":["A","B"]};
+const SSC=["FT","FSA","MFSM","WEI","MPA","SOP"];
+const SLOTS=[
+  {s:"08:30",e:"10:00"},{s:"10:15",e:"11:45"},{s:"12:00",e:"13:30"},
+  {s:"14:30",e:"16:00"},{s:"16:15",e:"17:45"},{s:"18:00",e:"19:30"},
+  {s:"19:45",e:"21:15"},{s:"21:45",e:"23:15"}
+];
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const HOLIDAYS={"2026-06-26":"Muharram","2026-08-15":"Independence Day","2026-08-26":"Id-E-Milad","2026-09-14":"Ganesh Chaturthi"};
+const SPECIAL={"2026-08-29":"Blocked – TT","2026-08-30":"Blocked – TT","2026-09-05":"Tangerine Trails","2026-09-06":"Tangerine Trails"};
+const SIP=["2026-07-06","2026-07-07","2026-07-08","2026-07-09","2026-07-10"];
+
+const FALLBACK=[
+  ["2026-06-23",1,"FSA","1","CR02",0],["2026-06-23",1,"CSG-A","1","CR05",0],["2026-06-23",1,"DDM-A","1","CR01",1],["2026-06-23",1,"CMNS-A","1","CR02",1],["2026-06-23",1,"CMNS-B","1","CR02",2],["2026-06-23",1,"CV-B","1","CR05",2],["2026-06-23",1,"MPA","1","CR06",2],["2026-06-23",1,"DDM-B","1","CR02",3],["2026-06-23",1,"BDMDM-A","1","CR06",3],["2026-06-23",1,"CV-A","1","CR05",3],["2026-06-23",1,"BDMDM-B","1","CR06",4],["2026-06-23",1,"DMEC-C","1","CR05",5],["2026-06-23",1,"BM-B","1","CR04",5],["2026-06-23",1,"CSG-B","1","CR02",5],["2026-06-23",1,"DMEC-B","1","CR06",6],
+  ["2026-06-24",1,"FD-A","1","CR06",0],["2026-06-24",1,"DMEC-A","1","CR02",1],["2026-06-24",1,"FD-B","1","CR06",1],["2026-06-24",1,"MFSM","1","CR02",2],["2026-06-24",1,"DMEC-C","2","CR05",3],["2026-06-24",1,"BM-B","2","CR04",3],["2026-06-24",1,"SOP","1","CR06",3],["2026-06-24",1,"DMEC-B","2","CR06",4],["2026-06-24",1,"BM-C","1","CR02",4],["2026-06-24",1,"MC-A","1","CR05",5],["2026-06-24",1,"MC-B","1","CR02",6],
+  ["2026-06-25",1,"EOSC-B","1","CR06",0],["2026-06-25",1,"BM-A","1","CR05",0],["2026-06-25",1,"EOSC-A","1","CR06",1],["2026-06-25",1,"WEI","1","CR05",1],["2026-06-25",1,"BDMDM-B","2","CR06",2],["2026-06-25",1,"MFSM","2","CR02",2],["2026-06-25",1,"DDM-B","2","CR02",3],["2026-06-25",1,"BDMDM-A","2","CR06",3],["2026-06-25",1,"CV-A","2","CR05",3],["2026-06-25",1,"DDM-A","2","CR01",4],["2026-06-25",1,"CV-B","2","CR05",5],["2026-06-25",1,"MPA","2","CR06",5],
+  ["2026-06-27",1,"BM-C","2","CR02",0],["2026-06-27",1,"CMNS-A","2","CR02",1],["2026-06-27",1,"CMNS-A","3","CR02",2],["2026-06-27",1,"BM-A","2","CR05",3],["2026-06-27",1,"CMNS-B","2","CR02",4],["2026-06-27",1,"CMNS-B","3","CR02",5],
+  ["2026-06-29",2,"MC-A","2","CR05",1],["2026-06-29",2,"FD-A","2","CR06",1],["2026-06-29",2,"FT","1","CR02",1],["2026-06-29",2,"FD-B","2","CR06",2],["2026-06-29",2,"SCM-B","1","CR05",2],["2026-06-29",2,"DMEC-A","2","CR02",2],["2026-06-29",2,"EOSC-A","2","CR06",3],["2026-06-29",2,"WEI","2","CR05",3],["2026-06-29",2,"BM-A","3","CR05",4],["2026-06-29",2,"MC-B","2","CR02",4],["2026-06-29",2,"EOSC-B","2","CR06",4],["2026-06-29",2,"DMEC-B","3","CR06",5],["2026-06-29",2,"SCM-A","1","CR06",6],
+  ["2026-06-30",2,"FSA","2","CR02",1],["2026-06-30",2,"DDM-A","3","CR01",2],["2026-06-30",2,"CMNS-A","4","CR02",2],["2026-06-30",2,"CMNS-B","4","CR02",3],["2026-06-30",2,"CV-B","3","CR05",3],["2026-06-30",2,"MPA","3","CR06",3],["2026-06-30",2,"DDM-B","3","CR02",4],["2026-06-30",2,"BDMDM-A","3","CR06",4],["2026-06-30",2,"CV-A","3","CR05",4],["2026-06-30",2,"BDMDM-B","3","CR06",5],
+  ["2026-07-01",2,"FD-A","3","CR06",0],["2026-07-01",2,"DMEC-A","3","CR02",1],["2026-07-01",2,"FD-B","3","CR06",1],["2026-07-01",2,"MFSM","3","CR02",2],["2026-07-01",2,"DMEC-C","3","CR05",3],["2026-07-01",2,"BM-B","3","CR04",3],["2026-07-01",2,"SOP","2","CR06",3],["2026-07-01",2,"DMEC-B","4","CR06",4],["2026-07-01",2,"BM-C","3","CR02",4],["2026-07-01",2,"MC-A","3","CR05",5],["2026-07-01",2,"MC-B","3","CR02",6],
+  ["2026-07-02",2,"EOSC-B","3","CR06",0],["2026-07-02",2,"BM-A","4","CR05",0],["2026-07-02",2,"EOSC-A","3","CR06",1],["2026-07-02",2,"WEI","3","CR05",1],["2026-07-02",2,"BDMDM-B","4","CR06",2],["2026-07-02",2,"MFSM","4","CR02",2],["2026-07-02",2,"DDM-B","4","CR02",3],["2026-07-02",2,"BDMDM-A","4","CR06",3],["2026-07-02",2,"CV-A","4","CR05",3],["2026-07-02",2,"DDM-A","4","CR01",4],["2026-07-02",2,"CMNS-A","5","CR02",4],["2026-07-02",2,"CMNS-B","5","CR02",5],["2026-07-02",2,"CV-B","4","CR05",5],["2026-07-02",2,"MPA","4","CR06",5],
+  ["2026-07-03",2,"BM-C","4","CR02",0],["2026-07-03",2,"CSG-A","2","CR05",1],["2026-07-03",2,"SCM-A","2","CR06",1],["2026-07-03",2,"FSA","3","CR02",1],["2026-07-03",2,"DMEC-C","4","CR05",2],["2026-07-03",2,"CSG-B","2","CR02",2],["2026-07-03",2,"BM-B","4","CR04",2],["2026-07-03",2,"SOP","3","CR06",2],["2026-07-03",2,"FT","2","CR02",3],["2026-07-03",2,"DMEC-A","4","CR02",4],["2026-07-03",2,"SCM-B","2","CR05",4],["2026-07-03",2,"DMEC-B","5","CR06",5],
+  ["2026-07-04",2,"CSG-A","3","CR05",1],["2026-07-04",2,"CSG-B","3","CR02",2],
+  ["2026-07-06",3,"FD-A","4","CR06",1],["2026-07-06",3,"FT","3","CR02",1],["2026-07-06",3,"FD-B","4","CR06",2],["2026-07-06",3,"SCM-B","3","CR05",2],
+  ["2026-07-07",3,"WEI","4","CR05",0],["2026-07-07",3,"CSG-A","4","CR05",1],["2026-07-07",3,"FSA","4","CR02",1],["2026-07-07",3,"SCM-A","3","CR06",1],["2026-07-07",3,"CSG-B","4","CR02",2],["2026-07-07",3,"SOP","4","CR06",2],
+  ["2026-07-08",3,"FD-A","5","CR06",1],["2026-07-08",3,"MC-A","4","CR05",1],["2026-07-08",3,"FT","4","CR02",1],["2026-07-08",3,"DMEC-A","5","CR02",2],["2026-07-08",3,"FD-B","5","CR06",2],["2026-07-08",3,"SCM-B","4","CR05",2],
+  ["2026-07-09",3,"EOSC-B","4","CR06",0],["2026-07-09",3,"BM-A","5","CR05",0],["2026-07-09",3,"MC-B","4","CR02",0],["2026-07-09",3,"EOSC-A","4","CR06",1],["2026-07-09",3,"WEI","5","CR05",1],["2026-07-09",3,"MFSM","5","CR02",2],
+  ["2026-07-10",3,"BM-C","5","CR02",0],["2026-07-10",3,"CSG-A","5","CR05",1],["2026-07-10",3,"SCM-A","4","CR06",1],["2026-07-10",3,"FSA","5","CR02",1],["2026-07-10",3,"DMEC-C","5","CR05",2],["2026-07-10",3,"CSG-B","5","CR02",2],["2026-07-10",3,"SOP","5","CR06",2],["2026-07-10",3,"BM-B","5","CR04",2],
+  ["2026-07-13",4,"MC-A","5","CR05",1],["2026-07-13",4,"FD-A","6","CR06",1],["2026-07-13",4,"FT","5","CR02",1],["2026-07-13",4,"FD-B","6","CR06",2],["2026-07-13",4,"SCM-B","5","CR05",2],["2026-07-13",4,"EOSC-A","5","CR06",3],["2026-07-13",4,"WEI","6","CR05",3],["2026-07-13",4,"BM-A","6","CR05",4],["2026-07-13",4,"MC-B","5","CR02",4],["2026-07-13",4,"EOSC-B","5","CR06",4],["2026-07-13",4,"SCM-A","5","CR06",5],
+  ["2026-07-14",4,"CSG-B","6","CR02",0],["2026-07-14",4,"CSG-A","6","CR05",1],["2026-07-14",4,"FSA","6","CR02",1],["2026-07-14",4,"DDM-A","5","CR01",2],["2026-07-14",4,"CMNS-A","6","CR02",2],["2026-07-14",4,"CMNS-B","6","CR02",3],["2026-07-14",4,"CV-B","5","CR05",3],["2026-07-14",4,"MPA","5","CR06",3],["2026-07-14",4,"DDM-B","5","CR02",4],["2026-07-14",4,"BDMDM-A","5","CR06",4],["2026-07-14",4,"CV-A","5","CR05",4],["2026-07-14",4,"BDMDM-B","5","CR06",5],
+  ["2026-07-15",4,"FD-A","7","CR06",0],["2026-07-15",4,"DMEC-A","6","CR02",1],["2026-07-15",4,"FD-B","7","CR06",1],["2026-07-15",4,"MFSM","6","CR02",2],["2026-07-15",4,"DMEC-C","6","CR05",3],["2026-07-15",4,"BM-B","6","CR04",3],["2026-07-15",4,"SOP","6","CR06",3],["2026-07-15",4,"DMEC-B","6","CR06",4],["2026-07-15",4,"BM-C","6","CR02",4],["2026-07-15",4,"MC-A","6","CR05",5],["2026-07-15",4,"MC-B","6","CR02",6],
+  ["2026-07-16",4,"EOSC-B","6","CR06",0],["2026-07-16",4,"BM-A","7","CR05",0],["2026-07-16",4,"EOSC-A","6","CR06",1],["2026-07-16",4,"WEI","7","CR05",1],["2026-07-16",4,"BDMDM-B","6","CR06",2],["2026-07-16",4,"MFSM","7","CR02",2],["2026-07-16",4,"DDM-B","6","CR02",3],["2026-07-16",4,"BDMDM-A","6","CR06",3],["2026-07-16",4,"CV-A","6","CR05",3],["2026-07-16",4,"DDM-A","6","CR01",4],["2026-07-16",4,"CMNS-A","7","CR02",4],["2026-07-16",4,"CMNS-B","7","CR02",5],["2026-07-16",4,"CV-B","6","CR05",5],["2026-07-16",4,"MPA","6","CR06",5],
+  ["2026-07-17",4,"BM-C","7","CR02",0],["2026-07-17",4,"CSG-A","7","CR05",1],["2026-07-17",4,"SCM-A","6","CR06",1],["2026-07-17",4,"FSA","7","CR02",1],["2026-07-17",4,"DMEC-C","7","CR05",2],["2026-07-17",4,"CSG-B","7","CR02",2],["2026-07-17",4,"BM-B","7","CR04",2],["2026-07-17",4,"SOP","7","CR06",2],["2026-07-17",4,"FT","6","CR02",3],["2026-07-17",4,"DMEC-A","7","CR02",4],["2026-07-17",4,"SCM-B","6","CR05",4],["2026-07-17",4,"DMEC-B","7","CR06",5],
+  ["2026-07-20",5,"MC-A","7","CR05",1],["2026-07-20",5,"FD-A","8","CR06",1],["2026-07-20",5,"FT","7","CR02",1],["2026-07-20",5,"FD-B","8","CR06",2],["2026-07-20",5,"SCM-B","7","CR05",2],["2026-07-20",5,"EOSC-A","7","CR06",3],["2026-07-20",5,"WEI","8","CR05",3],["2026-07-20",5,"BM-A","8","CR05",4],["2026-07-20",5,"MC-B","7","CR02",4],["2026-07-20",5,"EOSC-B","7","CR06",4],["2026-07-20",5,"SCM-A","7","CR06",5],
+  ["2026-07-21",5,"CSG-B","8","CR02",0],["2026-07-21",5,"CSG-A","8","CR05",1],["2026-07-21",5,"FSA","8","CR02",1],["2026-07-21",5,"DDM-A","7","CR01",2],["2026-07-21",5,"CMNS-A","8","CR02",2],["2026-07-21",5,"CMNS-B","8","CR02",3],["2026-07-21",5,"CV-B","7","CR05",3],["2026-07-21",5,"MPA","7","CR06",3],["2026-07-21",5,"DDM-B","7","CR02",4],["2026-07-21",5,"BDMDM-A","7","CR06",4],["2026-07-21",5,"CV-A","7","CR05",4],["2026-07-21",5,"BDMDM-B","7","CR06",5],
+  ["2026-07-22",5,"FD-A","9","CR06",0],["2026-07-22",5,"DMEC-A","8","CR02",1],["2026-07-22",5,"FD-B","9","CR06",1],["2026-07-22",5,"MFSM","8","CR02",2],["2026-07-22",5,"DMEC-C","8","CR05",3],["2026-07-22",5,"BM-B","8","CR04",3],["2026-07-22",5,"SOP","8","CR06",3],["2026-07-22",5,"DMEC-B","8","CR06",4],["2026-07-22",5,"BM-C","8","CR02",4],["2026-07-22",5,"MC-A","8","CR05",5],["2026-07-22",5,"MC-B","8","CR02",6],
+  ["2026-07-23",5,"EOSC-B","8","CR06",0],["2026-07-23",5,"BM-A","9","CR05",0],["2026-07-23",5,"EOSC-A","8","CR06",1],["2026-07-23",5,"WEI","9","CR05",1],["2026-07-23",5,"BDMDM-B","8","CR06",2],["2026-07-23",5,"MFSM","9","CR02",2],["2026-07-23",5,"DDM-B","8","CR02",3],["2026-07-23",5,"BDMDM-A","8","CR06",3],["2026-07-23",5,"CV-A","8","CR05",3],["2026-07-23",5,"DDM-A","8","CR01",4],["2026-07-23",5,"CMNS-A","9","CR02",4],["2026-07-23",5,"CMNS-B","9","CR02",5],["2026-07-23",5,"CV-B","8","CR05",5],["2026-07-23",5,"MPA","8","CR06",5],
+  ["2026-07-24",5,"BM-C","9","CR02",0],["2026-07-24",5,"SCM-A","8","CR06",1],["2026-07-24",5,"FSA","9","CR02",1],["2026-07-24",5,"DMEC-C","9","CR05",2],["2026-07-24",5,"BM-B","9","CR04",2],["2026-07-24",5,"SOP","9","CR06",2],["2026-07-24",5,"FT","8","CR02",3],["2026-07-24",5,"DMEC-A","9","CR02",4],["2026-07-24",5,"SCM-B","8","CR05",4],["2026-07-24",5,"DMEC-B","9","CR06",5],
+  ["2026-07-26",5,"CMNS-A","10","CR02",1],["2026-07-26",5,"CMNS-A","11","CR02",2],["2026-07-26",5,"CMNS-B","10","CR02",4],["2026-07-26",5,"CMNS-B","11","CR02",5],
+  ["2026-07-27",6,"FD-A","10","CR06",1],["2026-07-27",6,"FT","9","CR02",1],["2026-07-27",6,"FD-B","10","CR06",2],["2026-07-27",6,"SCM-B","9","CR05",2],["2026-07-27",6,"EOSC-A","9","CR06",3],["2026-07-27",6,"BM-A","10","CR05",4],["2026-07-27",6,"EOSC-B","9","CR06",4],["2026-07-27",6,"BM-C","10","CR02",5],["2026-07-27",6,"SCM-A","9","CR06",6],
+  ["2026-07-28",6,"DDM-A","9","CR01",0],["2026-07-28",6,"CSG-A","9","CR05",1],["2026-07-28",6,"FSA","10","CR02",1],["2026-07-28",6,"CSG-B","9","CR02",2],["2026-07-28",6,"DDM-B","9","CR02",3],["2026-07-28",6,"BDMDM-A","9","CR06",3],["2026-07-28",6,"CV-A","9","CR05",3],["2026-07-28",6,"BDMDM-B","9","CR06",4],["2026-07-28",6,"CV-B","9","CR05",5],["2026-07-28",6,"MPA","9","CR06",5],["2026-07-28",6,"CMNS-B","12","CR02",5],["2026-07-28",6,"CMNS-B","13","CR02",6],
+  ["2026-07-29",6,"FD-A","11","CR06",0],["2026-07-29",6,"DMEC-A","10","CR02",1],["2026-07-29",6,"FD-B","11","CR06",1],["2026-07-29",6,"MFSM","10","CR02",2],["2026-07-29",6,"DMEC-C","10","CR05",3],["2026-07-29",6,"BM-B","10","CR04",3],["2026-07-29",6,"SOP","10","CR06",3],["2026-07-29",6,"DMEC-B","10","CR06",4],["2026-07-29",6,"BM-C","11","CR02",4],["2026-07-29",6,"MC-A","9","CR05",5],["2026-07-29",6,"MC-B","9","CR02",6],
+  ["2026-07-30",6,"EOSC-B","10","CR06",0],["2026-07-30",6,"EOSC-A","10","CR06",1],["2026-07-30",6,"WEI","10","CR05",1],["2026-07-30",6,"BDMDM-B","10","CR06",2],["2026-07-30",6,"MFSM","11","CR02",2],["2026-07-30",6,"DDM-B","10","CR02",3],["2026-07-30",6,"BDMDM-A","10","CR06",3],["2026-07-30",6,"CV-A","10","CR05",3],["2026-07-30",6,"DDM-A","10","CR01",4],["2026-07-30",6,"CV-B","10","CR05",5],["2026-07-30",6,"MPA","10","CR06",5],
+  ["2026-07-31",6,"MC-B","10","CR02",0],["2026-07-31",6,"BM-A","11","CR05",0],["2026-07-31",6,"CSG-A","10","CR05",1],["2026-07-31",6,"SCM-A","10","CR06",1],["2026-07-31",6,"FSA","11","CR02",1],["2026-07-31",6,"DMEC-C","11","CR05",2],["2026-07-31",6,"CSG-B","10","CR02",2],["2026-07-31",6,"BM-B","11","CR04",2],["2026-07-31",6,"SOP","11","CR06",2],["2026-07-31",6,"FT","10","CR02",3],["2026-07-31",6,"MC-A","10","CR05",3],["2026-07-31",6,"DMEC-A","11","CR02",4],["2026-07-31",6,"SCM-B","10","CR05",4],["2026-07-31",6,"DMEC-B","11","CR06",5],
+  ["2026-08-03",7,"MC-A","11","CR05",1],["2026-08-03",7,"FD-A","12","CR06",1],["2026-08-03",7,"FT","11","CR02",1],["2026-08-03",7,"FD-B","12","CR06",2],["2026-08-03",7,"SCM-B","11","CR05",2],["2026-08-03",7,"EOSC-A","11","CR06",3],["2026-08-03",7,"WEI","11","CR05",3],["2026-08-03",7,"BM-A","12","CR05",4],["2026-08-03",7,"MC-B","11","CR02",4],["2026-08-03",7,"EOSC-B","11","CR06",4],["2026-08-03",7,"SCM-A","11","CR06",5],
+  ["2026-08-04",7,"CSG-B","11","CR02",0],["2026-08-04",7,"CSG-A","11","CR05",1],["2026-08-04",7,"FSA","12","CR02",1],["2026-08-04",7,"CV-B","11","CR05",2],["2026-08-04",7,"MPA","11","CR06",2],["2026-08-04",7,"DDM-B","11","CR02",3],["2026-08-04",7,"BDMDM-A","11","CR06",3],["2026-08-04",7,"CV-A","11","CR05",3],["2026-08-04",7,"BDMDM-B","11","CR06",4],["2026-08-04",7,"DDM-A","11","CR01",5],["2026-08-04",7,"CMNS-A","12","CR02",5],["2026-08-04",7,"CMNS-A","13","CR02",6],
+  ["2026-08-05",7,"FD-A","13","CR06",0],["2026-08-05",7,"DMEC-A","12","CR02",1],["2026-08-05",7,"FD-B","13","CR06",1],["2026-08-05",7,"MFSM","12","CR02",2],["2026-08-05",7,"DMEC-C","12","CR05",3],["2026-08-05",7,"BM-B","12","CR04",3],["2026-08-05",7,"SOP","12","CR06",3],["2026-08-05",7,"DMEC-B","12","CR06",4],["2026-08-05",7,"BM-C","12","CR02",4],["2026-08-05",7,"MC-A","12","CR05",5],["2026-08-05",7,"MC-B","12","CR02",6],
+  ["2026-08-06",7,"EOSC-B","12","CR06",0],["2026-08-06",7,"BM-A","13","CR05",0],["2026-08-06",7,"EOSC-A","12","CR06",1],["2026-08-06",7,"WEI","12","CR05",1],["2026-08-06",7,"BDMDM-B","12","CR06",2],["2026-08-06",7,"MFSM","13","CR02",2],["2026-08-06",7,"DDM-B","12","CR02",3],["2026-08-06",7,"BDMDM-A","12","CR06",3],["2026-08-06",7,"CV-A","12","CR05",3],["2026-08-06",7,"DDM-A","12","CR01",4],["2026-08-06",7,"CV-B","12","CR05",5],["2026-08-06",7,"MPA","12","CR06",5],
+  ["2026-08-07",7,"BM-C","13","CR02",0],["2026-08-07",7,"CSG-A","12","CR05",1],["2026-08-07",7,"SCM-A","12","CR06",1],["2026-08-07",7,"FSA","13","CR02",1],["2026-08-07",7,"DMEC-C","13","CR05",2],["2026-08-07",7,"CSG-B","12","CR02",2],["2026-08-07",7,"BM-B","13","CR04",2],["2026-08-07",7,"SOP","13","CR06",2],["2026-08-07",7,"FT","12","CR02",3],["2026-08-07",7,"DMEC-A","13","CR02",4],["2026-08-07",7,"SCM-B","12","CR05",4],["2026-08-07",7,"DMEC-B","13","CR06",5],
+  ["2026-08-08",7,"CMNS-A","14","CR02",1],["2026-08-08",7,"CMNS-A","15","CR02",2],["2026-08-08",7,"CMNS-B","14","CR02",4],["2026-08-08",7,"CMNS-B","15","CR02",5],
+  ["2026-08-10",8,"MC-A","13","CR05",1],["2026-08-10",8,"FD-A","14","CR06",1],["2026-08-10",8,"FT","13","CR02",1],["2026-08-10",8,"FD-B","14","CR06",2],["2026-08-10",8,"SCM-B","13","CR05",2],["2026-08-10",8,"EOSC-A","13","CR06",3],["2026-08-10",8,"WEI","13","CR05",3],["2026-08-10",8,"BM-A","14","CR05",4],["2026-08-10",8,"MC-B","13","CR02",4],["2026-08-10",8,"EOSC-B","13","CR06",4],["2026-08-10",8,"SCM-A","13","CR06",5],
+  ["2026-08-11",8,"DDM-A","13","CR01",0],["2026-08-11",8,"CSG-A","13","CR05",1],["2026-08-11",8,"FSA","14","CR02",1],["2026-08-11",8,"CSG-B","13","CR02",2],["2026-08-11",8,"DDM-B","13","CR02",3],["2026-08-11",8,"BDMDM-A","13","CR06",3],["2026-08-11",8,"CV-A","13","CR05",3],["2026-08-11",8,"BDMDM-B","13","CR06",4],["2026-08-11",8,"CMNS-B","16","CR02",5],["2026-08-11",8,"CV-B","13","CR05",5],["2026-08-11",8,"MPA","13","CR06",5],["2026-08-11",8,"CMNS-B","17","CR02",6],
+  ["2026-08-12",8,"FD-A","15","CR06",0],["2026-08-12",8,"DMEC-A","14","CR02",1],["2026-08-12",8,"FD-B","15","CR06",1],["2026-08-12",8,"MFSM","14","CR02",2],["2026-08-12",8,"DMEC-C","14","CR05",3],["2026-08-12",8,"BM-B","14","CR04",3],["2026-08-12",8,"SOP","14","CR06",3],["2026-08-12",8,"DMEC-B","14","CR06",4],["2026-08-12",8,"BM-C","14","CR02",4],["2026-08-12",8,"MC-A","14","CR05",5],["2026-08-12",8,"MC-B","14","CR02",6],
+  ["2026-08-13",8,"EOSC-B","14","CR06",0],["2026-08-13",8,"BM-A","15","CR05",0],["2026-08-13",8,"EOSC-A","14","CR06",1],["2026-08-13",8,"WEI","14","CR05",1],["2026-08-13",8,"BDMDM-B","14","CR06",2],["2026-08-13",8,"MFSM","15","CR02",2],["2026-08-13",8,"DDM-B","14","CR02",3],["2026-08-13",8,"BDMDM-A","14","CR06",3],["2026-08-13",8,"CV-A","14","CR05",3],["2026-08-13",8,"DDM-A","14","CR01",4],["2026-08-13",8,"CV-B","14","CR05",5],["2026-08-13",8,"MPA","14","CR06",5],
+  ["2026-08-14",8,"BM-C","15","CR02",0],["2026-08-14",8,"CSG-A","14","CR05",1],["2026-08-14",8,"SCM-A","14","CR06",1],["2026-08-14",8,"FSA","15","CR02",1],["2026-08-14",8,"DMEC-C","15","CR05",2],["2026-08-14",8,"CSG-B","14","CR02",2],["2026-08-14",8,"BM-B","15","CR04",2],["2026-08-14",8,"SOP","15","CR06",2],["2026-08-14",8,"FT","14","CR02",3],["2026-08-14",8,"DMEC-A","15","CR02",4],["2026-08-14",8,"SCM-B","14","CR05",4],["2026-08-14",8,"DMEC-B","15","CR06",5],
+  ["2026-08-17",9,"MC-A","15","CR05",1],["2026-08-17",9,"FD-A","16","CR06",1],["2026-08-17",9,"FT","15","CR02",1],["2026-08-17",9,"FD-B","16","CR06",2],["2026-08-17",9,"SCM-B","15","CR05",2],["2026-08-17",9,"EOSC-A","15","CR06",3],["2026-08-17",9,"WEI","15","CR05",3],["2026-08-17",9,"BM-A","16","CR05",4],["2026-08-17",9,"MC-B","15","CR02",4],["2026-08-17",9,"EOSC-B","15","CR06",4],["2026-08-17",9,"SCM-A","15","CR06",5],
+  ["2026-08-18",9,"CSG-B","15","CR02",0],["2026-08-18",9,"CSG-A","15","CR05",1],["2026-08-18",9,"FSA","16","CR02",1],["2026-08-18",9,"CV-B","15","CR05",2],["2026-08-18",9,"MPA","15","CR06",2],["2026-08-18",9,"DDM-B","15","CR02",3],["2026-08-18",9,"BDMDM-A","15","CR06",3],["2026-08-18",9,"CV-A","15","CR05",3],["2026-08-18",9,"BDMDM-B","15","CR06",4],["2026-08-18",9,"DDM-A","15","CR01",5],["2026-08-18",9,"CMNS-A","16","CR02",5],["2026-08-18",9,"CMNS-A","17","CR02",6],
+  ["2026-08-19",9,"FD-A","17","CR06",0],["2026-08-19",9,"DMEC-A","16","CR02",1],["2026-08-19",9,"FD-B","17","CR06",1],["2026-08-19",9,"MFSM","16","CR02",2],["2026-08-19",9,"DMEC-C","16","CR05",3],["2026-08-19",9,"BM-B","16","CR04",3],["2026-08-19",9,"SOP","16","CR06",3],["2026-08-19",9,"DMEC-B","16","CR06",4],["2026-08-19",9,"BM-C","16","CR02",4],["2026-08-19",9,"MC-A","16","CR05",5],["2026-08-19",9,"MC-B","16","CR02",6],
+  ["2026-08-20",9,"EOSC-B","16","CR06",0],["2026-08-20",9,"BM-A","17","CR05",0],["2026-08-20",9,"EOSC-A","16","CR06",1],["2026-08-20",9,"WEI","16","CR05",1],["2026-08-20",9,"BDMDM-B","16","CR06",2],["2026-08-20",9,"MFSM","17","CR02",2],["2026-08-20",9,"DDM-B","16","CR02",3],["2026-08-20",9,"BDMDM-A","16","CR06",3],["2026-08-20",9,"CV-A","16","CR05",3],["2026-08-20",9,"DDM-A","16","CR01",4],["2026-08-20",9,"CMNS-A","18","CR02",4],["2026-08-20",9,"CV-B","16","CR05",5],["2026-08-20",9,"MPA","16","CR06",5],["2026-08-20",9,"CMNS-B","18","CR02",5],
+  ["2026-08-21",9,"BM-C","17","CR02",0],["2026-08-21",9,"CSG-A","16","CR05",1],["2026-08-21",9,"SCM-A","16","CR06",1],["2026-08-21",9,"FSA","17","CR02",1],["2026-08-21",9,"DMEC-C","17","CR05",2],["2026-08-21",9,"CSG-B","16","CR02",2],["2026-08-21",9,"BM-B","17","CR04",2],["2026-08-21",9,"SOP","17","CR06",2],["2026-08-21",9,"FT","16","CR02",3],["2026-08-21",9,"DMEC-A","17","CR02",4],["2026-08-21",9,"SCM-B","16","CR05",4],["2026-08-21",9,"DMEC-B","17","CR06",5],
+  ["2026-08-24",10,"MC-A","17","CR05",1],["2026-08-24",10,"FD-A","18","CR06",1],["2026-08-24",10,"FT","17","CR02",1],["2026-08-24",10,"FD-B","18","CR06",2],["2026-08-24",10,"SCM-B","17","CR05",2],["2026-08-24",10,"EOSC-A","17","CR06",3],["2026-08-24",10,"WEI","17","CR05",3],["2026-08-24",10,"BM-A","18","CR05",4],["2026-08-24",10,"MC-B","17","CR02",4],["2026-08-24",10,"EOSC-B","17","CR06",4],["2026-08-24",10,"BM-C","18","CR02",5],["2026-08-24",10,"SCM-A","17","CR06",6],
+  ["2026-08-25",10,"DDM-A","17","CR01",0],["2026-08-25",10,"CSG-A","17","CR05",1],["2026-08-25",10,"FSA","18","CR02",1],["2026-08-25",10,"CSG-B","17","CR02",2],["2026-08-25",10,"CV-B","17","CR05",3],["2026-08-25",10,"MPA","17","CR06",3],["2026-08-25",10,"DDM-B","17","CR02",4],["2026-08-25",10,"BDMDM-A","17","CR06",4],["2026-08-25",10,"CV-A","17","CR05",4],["2026-08-25",10,"BDMDM-B","17","CR06",5],
+  ["2026-08-27",10,"EOSC-B","18","CR06",0],["2026-08-27",10,"EOSC-A","18","CR06",1],["2026-08-27",10,"WEI","18","CR05",1],["2026-08-27",10,"BDMDM-B","18","CR06",2],["2026-08-27",10,"MFSM","18","CR02",2],["2026-08-27",10,"DDM-B","18","CR02",3],["2026-08-27",10,"BDMDM-A","18","CR06",3],["2026-08-27",10,"CV-A","18","CR05",3],["2026-08-27",10,"DDM-A","18","CR01",4],["2026-08-27",10,"CMNS-A","19","CR02",4],["2026-08-27",10,"CV-B","18","CR05",5],["2026-08-27",10,"MPA","18","CR06",5],["2026-08-27",10,"CMNS-B","19","CR02",5],
+  ["2026-08-28",10,"MC-B","18","CR02",0],["2026-08-28",10,"CSG-A","18","CR05",1],["2026-08-28",10,"SCM-A","18","CR06",1],["2026-08-28",10,"DMEC-C","18","CR05",2],["2026-08-28",10,"CSG-B","18","CR02",2],["2026-08-28",10,"BM-B","18","CR04",2],["2026-08-28",10,"SOP","18","CR06",2],["2026-08-28",10,"FT","18","CR02",3],["2026-08-28",10,"MC-A","18","CR05",3],["2026-08-28",10,"DMEC-A","18","CR02",4],["2026-08-28",10,"SCM-B","18","CR05",4],["2026-08-28",10,"DMEC-B","18","CR06",5],
+  ["2026-08-31",11,"MC-A","19","CR05",1],["2026-08-31",11,"FD-A","19","CR06",1],["2026-08-31",11,"FT","19","CR02",1],["2026-08-31",11,"FD-B","19","CR06",2],["2026-08-31",11,"SCM-B","19","CR05",2],["2026-08-31",11,"EOSC-A","19","CR06",3],["2026-08-31",11,"WEI","19","CR05",3],["2026-08-31",11,"BM-A","19","CR05",4],["2026-08-31",11,"MC-B","19","CR02",4],["2026-08-31",11,"EOSC-B","19","CR06",4],["2026-08-31",11,"SCM-A","19","CR06",5],
+  ["2026-09-01",11,"DDM-A","19","CR01",0],["2026-09-01",11,"CSG-A","19","CR05",1],["2026-09-01",11,"FSA","19","CR02",1],["2026-09-01",11,"CSG-B","19","CR02",2],["2026-09-01",11,"CV-B","19","CR05",3],["2026-09-01",11,"MPA","19","CR06",3],["2026-09-01",11,"DDM-B","19","CR02",4],["2026-09-01",11,"BDMDM-A","19","CR06",4],["2026-09-01",11,"CV-A","19","CR05",4],["2026-09-01",11,"BDMDM-B","19","CR06",5],
+  ["2026-09-02",11,"FD-A","20","CR06",0],["2026-09-02",11,"DMEC-A","19","CR02",1],["2026-09-02",11,"FD-B","20","CR06",1],["2026-09-02",11,"MFSM","19","CR02",2],["2026-09-02",11,"DMEC-C","19","CR05",3],["2026-09-02",11,"BM-B","19","CR04",3],["2026-09-02",11,"SOP","19","CR06",3],["2026-09-02",11,"DMEC-B","19","CR06",4],["2026-09-02",11,"BM-C","19","CR02",4],["2026-09-02",11,"MC-A","20","CR05",5],["2026-09-02",11,"MC-B","20","CR02",6],
+  ["2026-09-03",11,"EOSC-B","20","CR06",0],["2026-09-03",11,"BM-A","20","CR05",0],["2026-09-03",11,"EOSC-A","20","CR06",1],["2026-09-03",11,"WEI","20","CR05",1],["2026-09-03",11,"BDMDM-B","20","CR06",2],["2026-09-03",11,"MFSM","20","CR02",2],["2026-09-03",11,"DDM-B","20","CR02",3],["2026-09-03",11,"BDMDM-A","20","CR06",3],["2026-09-03",11,"CV-A","20","CR05",3],["2026-09-03",11,"DDM-A","20","CR01",4],["2026-09-03",11,"CMNS-A","20","CR02",4],["2026-09-03",11,"CMNS-B","20","CR02",5],["2026-09-03",11,"CV-B","20","CR05",5],["2026-09-03",11,"MPA","20","CR06",5],
+  ["2026-09-04",11,"BM-C","20","CR02",0],["2026-09-04",11,"CSG-A","20","CR05",1],["2026-09-04",11,"SCM-A","20","CR06",1],["2026-09-04",11,"FSA","20","CR02",1],["2026-09-04",11,"DMEC-C","20","CR05",2],["2026-09-04",11,"CSG-B","20","CR02",2],["2026-09-04",11,"BM-B","20","CR04",2],["2026-09-04",11,"SOP","20","CR06",2],["2026-09-04",11,"FT","20","CR02",3],["2026-09-04",11,"DMEC-A","20","CR02",4],["2026-09-04",11,"SCM-B","20","CR05",4],["2026-09-04",11,"DMEC-B","20","CR06",5],
+];
+
+const LS_TT='gs_timetable_v1',LS_SYNC='gs_last_sync',LS_URL='gs_sheet_url',LS_PW='admin_pw';
+const DEFAULT_PW='aditya123456';
+const SHEET_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRaM0Lc9N3E7sCZDrbtw96W6mHA5-DTXcsSAlk-C13KgwSKJCE7LwtjZpJtvi_aoawxLBgfvEQg1DrR/pub?output=csv';
+
+function getRaw(){try{const s=localStorage.getItem(LS_TT);if(s){const p=JSON.parse(s);if(Array.isArray(p)&&p.length)return p;}}catch(e){}return FALLBACK;}
+function isLive(){try{const s=localStorage.getItem(LS_TT);if(s){const p=JSON.parse(s);return Array.isArray(p)&&p.length>0;}}catch(e){}return false;}
+
+/* ── STATE ── */
+let dark=localStorage.getItem('theme')!=='light';
+let view='home';
+let selDate=new Date();
+let wkBase=new Date();
+let calMonth=new Date(2026,5,1);
+let obStep=1;
+let name=localStorage.getItem('studentName')||'';
+let subjs=JSON.parse(localStorage.getItem('chosenSubjects')||'[]');
+let tmpName='',tmpSel={};
+let sched={};
+let RAW=getRaw();
+let showEdit=false,editName='',editSel={};
+let adminMode=false,adminIn=false,adminSyncing=false,adminMsg=null,adminPrev=null;
+let adminUrl=localStorage.getItem(LS_URL)||SHEET_URL;
+let gearN=0,gearT=null;
+
+function buildSched(){
+  sched={};
+  if(!subjs.length)return;
+  const s=new Set(subjs);
+  RAW.forEach(([date,week,subj,ses,room,slot])=>{
+    if(!s.has(subj))return;
+    if(!sched[date])sched[date]=[];
+    sched[date].push({date,week,subj,ses,room,slot,key:`${date}|${subj}|${ses}`});
+  });
+  Object.keys(sched).forEach(d=>sched[d].sort((a,b)=>a.slot-b.slot));
+}
+buildSched();
+
+function att(key){return localStorage.getItem('att_'+key);}
+function fmt(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function isToday(d){return fmt(d)===fmt(new Date());}
+function getDL(d){
+  const s=fmt(d);
+  if(HOLIDAYS[s])return{t:HOLIDAYS[s],c:'hol'};
+  if(SPECIAL[s])return{t:SPECIAL[s],c:'sp'};
+  const dt=new Date(s+'T00:00:00');
+  if(dt>=new Date('2026-09-07')&&dt<=new Date('2026-09-17')&&s!=='2026-09-14')return{t:'ET Exam Week',c:'exam'};
+  if(SIP.includes(s))return{t:'SIP Presentations',c:'sip'};
+  return null;
+}
+function weekOf(base){
+  const d=new Date(base),dow=d.getDay(),mon=new Date(d);
+  mon.setDate(d.getDate()-((dow+6)%7));
+  return Array.from({length:7},(_,i)=>{const x=new Date(mon);x.setDate(mon.getDate()+i);return x;});
+}
+function pill(subj){
+  const s=ALL_SUBJECTS[subj];if(!s)return'';
+  return`<span class="pill" style="background:${s.color}22;color:${s.color};border:1px solid ${s.color}44">${s.short}</span>`;
+}
+function getPW(){return localStorage.getItem(LS_PW)||DEFAULT_PW;}
+
+/* ── ROOT RENDER ── */
+function render(){
+  document.body.className=dark?'':'light';
+  const app=document.getElementById('app');
+  if(adminMode){app.innerHTML=renderAdmin();bindAdmin();return;}
+  if(!name||!subjs.length){app.innerHTML=renderOnboard();bindOnboard();return;}
+  app.innerHTML=`
+    <div class="hdr">
+      <div>
+        <div class="hdr-title">MBA Term IV</div>
+        <div class="hdr-sub">👋 ${name}${isLive()?'&nbsp;<span style="font-size:10px;background:#22c55e20;color:#22c55e;border-radius:8px;padding:1px 7px;font-weight:700">● Live</span>':''}</div>
+      </div>
+      <div class="hdr-btns">
+        <button class="icon-btn" id="editBtn">✏️ Edit</button>
+        <button class="icon-btn" id="themeBtn">${dark?'☀️':'🌙'}</button>
+        <button class="icon-btn" id="gearBtn">⚙️</button>
+      </div>
+    </div>
+    ${showEdit?renderEditModal():''}
+    <div class="content" id="content"></div>
+    <nav class="nav" id="nav"></nav>`;
+  renderNav();
+  const el=document.getElementById('content');
+  if(view==='home')el.innerHTML=vHome();
+  else if(view==='daily')el.innerHTML=vDaily();
+  else if(view==='weekly')el.innerHTML=vWeekly();
+  else if(view==='calendar')el.innerHTML=vCalendar();
+  else if(view==='attendance')el.innerHTML=vAttendance();
+  else if(view==='analytics')el.innerHTML=vAnalytics();
+  bindEvents();
+}
+
+/* ── NAV ── */
+function renderNav(){
+  const tabs=[{id:'home',i:'🏠',l:'Home'},{id:'daily',i:'📅',l:'Daily'},{id:'weekly',i:'📆',l:'Weekly'},{id:'calendar',i:'🗓',l:'Cal'},{id:'attendance',i:'✅',l:'Attend'},{id:'analytics',i:'📊',l:'Stats'}];
+  document.getElementById('nav').innerHTML=tabs.map(t=>`
+    <button class="nav-btn" data-view="${t.id}">
+      <span class="nav-ico">${t.i}</span>
+      <span class="nav-lbl ${view===t.id?'on':''}">${t.l}</span>
+      ${view===t.id?'<div class="nav-bar"></div>':''}
+    </button>`).join('');
+}
+
+/* ── CLASS CARD ── */
+function classCard(c,nextHighlight=false,showAttBtns=false){
+  const s=ALL_SUBJECTS[c.subj],sl=SLOTS[c.slot];
+  if(!s)return'';
+  const a=att(c.key);
+  const attBadge=a?`<span class="pill" style="background:${a==='P'?'#22c55e20':a==='A'?'#f43f5e20':'#ffffff10'};color:${a==='P'?'var(--green)':a==='A'?'var(--red)':'var(--text3)'};border:1px solid ${a==='P'?'var(--green)':a==='A'?'var(--red)':'var(--border)'}">${a==='P'?'✅ Present':a==='A'?'❌ Absent':'🔵 Cancelled'}</span>`:'';
+  const attHTML=showAttBtns?`
+    <div class="disc">📌 Personal reference only — official records kept by institute.</div>
+    <div class="att-row">
+      <button class="att-btn btn-p ${a&&a!=='P'?'dim':''}" data-key="${c.key}" data-val="P">✅ Present</button>
+      <button class="att-btn btn-a ${a&&a!=='A'?'dim':''}" data-key="${c.key}" data-val="A">❌ Absent</button>
+      <button class="att-btn btn-c ${a&&a!=='C'?'dim':''}" data-key="${c.key}" data-val="C">🔵 Cancel</button>
+    </div>
+    ${a?`<button class="clear-btn" data-key="${c.key}">Clear marking</button>`:''}`:''
+  ;
+  return`<div class="class-card" style="border-left-color:${s.color}${nextHighlight?';border-color:'+s.color+';background:'+s.color+'0d':''}">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+      <div style="flex:1;min-width:0">
+        <div class="cc-name">${s.name}</div>
+        <div class="cc-meta">
+          ${pill(c.subj)}
+          ${nextHighlight?`<span class="pill" style="background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border)">⚡ Next</span>`:''}
+          ${attBadge}
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div class="cc-time">${sl.s}</div>
+        <div class="cc-sub">– ${sl.e}</div>
+        <div class="cc-sub" style="margin-top:3px">🏛 ${c.room}</div>
+        <div class="cc-sub">Ses ${c.ses}</div>
+      </div>
+    </div>
+    ${showAttBtns?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">${attHTML}</div>`:''}
+  </div>`;
+}
+
+/* ── HOME ── */
+function vHome(){
+  const t=new Date(),ts=fmt(t);
+  const tc=sched[ts]||[];
+  const wd=weekOf(t);
+  const wt=wd.reduce((s,d)=>s+(sched[fmt(d)]||[]).length,0);
+  const rem=Object.keys(sched).filter(d=>new Date(d+'T00:00:00')>=t).reduce((s,d)=>s+sched[d].length,0);
+  const nowM=t.getHours()*60+t.getMinutes();
+  const next=tc.find(c=>{const[h,m]=SLOTS[c.slot].s.split(':').map(Number);return h*60+m>=nowM;});
+  const lbl=getDL(t);
+  const wn=tc[0]?.week;
+  return`
+    <div style="margin-bottom:18px">
+      <div style="font-size:24px;font-weight:800;letter-spacing:-.5px">${t.toLocaleDateString('en-IN',{weekday:'long'})}</div>
+      <div style="font-size:14px;color:var(--text3);margin-top:3px">${t.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</div>
+      ${wn?`<div style="font-size:12px;color:var(--accent);font-weight:700;margin-top:3px;letter-spacing:.3px">TERM WEEK ${wn}</div>`:''}
+    </div>
+    <div class="stat-row">
+      <div class="stat-box"><div class="stat-ico">📚</div><div class="stat-n">${tc.length}</div><div class="stat-lbl">Today</div></div>
+      <div class="stat-box"><div class="stat-ico">📅</div><div class="stat-n">${wt}</div><div class="stat-lbl">This Week</div></div>
+      <div class="stat-box"><div class="stat-ico">🎯</div><div class="stat-n">${rem}</div><div class="stat-lbl">Remaining</div></div>
+    </div>
+    ${next?`<div class="next-box"><div class="next-label">⚡ Next Class Today</div>${classCard(next,true,false)}</div>`:''}
+    <div class="card">
+      <div style="font-size:15px;font-weight:700;margin-bottom:12px">Today's Schedule <span class="badge">${tc.length}</span></div>
+      ${lbl?`<div class="alert" style="background:#f59e0b15;border:1px solid #f59e0b40;color:var(--yellow)">🎉 ${lbl.t}</div>`:''}
+      ${tc.length===0?`<div style="text-align:center;padding:28px 0;color:var(--text3)"><div style="font-size:36px">☀️</div><div style="margin-top:8px;font-size:14px;font-weight:600">${lbl?lbl.t:'No classes today!'}</div></div>`:tc.map(c=>classCard(c,false,false)).join('')}
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div style="font-size:15px;font-weight:700;margin-bottom:12px">This Week</div>
+      <div class="week-strip">
+        ${wd.map(d=>{
+          const ds=fmt(d),n=(sched[ds]||[]).length,isT=isToday(d),sp=getDL(d);
+          return`<div class="wd" data-date="${ds}" style="background:${isT?'var(--accent)':sp?'#f59e0b15':n>0?'var(--card2)':'transparent'};border-color:${isT?'var(--accent)':'var(--border)'}">
+            <div class="wd-day" style="color:${isT?'rgba(255,255,255,.7)':'var(--text3)'}">${DAYS[d.getDay()]}</div>
+            <div class="wd-num" style="color:${isT?'#fff':'var(--text)'}">${d.getDate()}</div>
+            <div class="wd-dot" style="color:${isT?'rgba(255,255,255,.85)':n>0?'var(--accent)':'var(--text3)'}">${sp?'🎉':n||'–'}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+/* ── DAILY ── */
+function vDaily(){
+  const sd=selDate,ss=fmt(sd);
+  const cls=sched[ss]||[];
+  const lbl=getDL(sd);
+  const wn=cls[0]?.week;
+  return`
+    <div class="nav-arrows">
+      <button class="arr" id="prevDay">‹</button>
+      <div class="nav-mid">
+        <div class="nav-mid-title">${sd.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'})}</div>
+        ${wn?`<div class="nav-mid-sub">Week ${wn}</div>`:''}
+      </div>
+      <button class="arr" id="nextDay">›</button>
+    </div>
+    <button class="today-btn" id="goToday">Today</button>
+    ${lbl?`<div class="alert" style="background:#f59e0b15;border:1px solid #f59e0b40;color:var(--yellow)">🎉 ${lbl.t}</div>`:''}
+    <div style="font-size:13px;color:var(--text3);margin-bottom:12px;font-weight:500">${cls.length} ${cls.length===1?'class':'classes'} scheduled</div>
+    ${cls.length===0
+      ?`<div class="card" style="text-align:center;padding:44px 0"><div style="font-size:44px">☀️</div><div style="font-size:15px;font-weight:700;margin-top:10px;color:var(--text)">No Classes</div><div style="font-size:13px;color:var(--text3);margin-top:4px">${lbl?lbl.t:'Enjoy your day!'}</div></div>`
+      :cls.map((c,i)=>{
+        const prev=i>0?cls[i-1].slot:null;
+        return(prev!==null&&c.slot>prev+1?`<div class="break-sep">☕ Break</div>`:'')+classCard(c,false,true);
+      }).join('')}`;
+}
+
+/* ── WEEKLY ── */
+function vWeekly(){
+  const wd=weekOf(wkBase);
+  const total=wd.reduce((s,d)=>s+(sched[fmt(d)]||[]).length,0);
+  let busy=null,bn=0;wd.forEach(d=>{const n=(sched[fmt(d)]||[]).length;if(n>bn){bn=n;busy=d;}});
+  const wn=wd.map(d=>sched[fmt(d)]?.[0]?.week).find(Boolean);
+  return`
+    <div class="nav-arrows">
+      <button class="arr" id="prevWeek">‹</button>
+      <div class="nav-mid">
+        <div class="nav-mid-title">${wd[0].toLocaleDateString('en-IN',{day:'numeric',month:'short'})} – ${wd[6].toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</div>
+        ${wn?`<div class="nav-mid-sub">Term Week ${wn}</div>`:''}
+      </div>
+      <button class="arr" id="nextWeek">›</button>
+    </div>
+    <button class="today-btn" id="goThisWeek">This Week</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <div class="card"><div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.4px">Total</div><div style="font-size:28px;font-weight:800;color:var(--accent);margin-top:4px">${total}</div></div>
+      <div class="card"><div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.4px">Busiest</div><div style="font-size:15px;font-weight:800;margin-top:4px;color:var(--text)">${busy?busy.toLocaleDateString('en-IN',{weekday:'short',day:'numeric'}):'–'}</div></div>
+    </div>
+    ${wd.map(d=>{
+      const ds=fmt(d),cls=sched[ds]||[],isT=isToday(d),sp=getDL(d);
+      return`<div class="week-day-card" style="border-color:${isT?'var(--accent)':'var(--border)'}" data-goto-date="${ds}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${cls.length?'10px':'0'}">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:15px;font-weight:800;color:${isT?'var(--accent)':'var(--text)'}">${d.toLocaleDateString('en-IN',{weekday:'short'})} ${d.getDate()}</span>
+            ${isT?`<span style="font-size:10px;background:var(--accent);color:#fff;border-radius:8px;padding:2px 7px;font-weight:700">TODAY</span>`:''}
+            ${sp?`<span style="font-size:11px;color:var(--yellow)">🎉 ${sp.t}</span>`:''}
+          </div>
+          <span style="font-size:12px;color:${cls.length?'var(--accent)':'var(--text3)'};font-weight:700">${cls.length} ${cls.length===1?'class':'classes'}</span>
+        </div>
+        ${cls.length?`<div style="display:flex;flex-wrap:wrap;gap:5px">${cls.map(c=>`<div style="display:flex;align-items:center;gap:4px;background:var(--card2);border-radius:8px;padding:4px 9px">${pill(c.subj)}<span style="font-size:11px;color:var(--text3);font-weight:500">${SLOTS[c.slot].s}</span></div>`).join('')}</div>`:''}
+      </div>`;
+    }).join('')}`;
+}
+
+/* ── CALENDAR ── */
+function vCalendar(){
+  const y=calMonth.getFullYear(),m=calMonth.getMonth();
+  const first=new Date(y,m,1),last=new Date(y,m+1,0);
+  const startDow=(first.getDay()+6)%7; // Mon=0
+  const ss=fmt(selDate);
+  const DAY_HDRS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let cells='';
+  for(let i=0;i<startDow;i++)cells+=`<div></div>`;
+  for(let i=1;i<=last.getDate();i++){
+    const d=new Date(y,m,i),ds=fmt(d),cls=sched[ds]||[],isT=isToday(d),sp=getDL(d),isSel=ss===ds;
+    const bg=isT?'var(--accent)':(isSel?'var(--accent-dim)':(sp?'#f59e0b18':(cls.length?'var(--card2)':'var(--card)')));
+    const borderC=isT?'var(--accent)':(isSel?'var(--accent)':'var(--border)');
+    cells+=`<div class="cal-cell" data-date="${ds}" style="background:${bg};border-color:${borderC}">
+      <div class="cal-num" style="color:${isT?'#fff':isSel?'var(--accent)':'var(--text)'}">${i}</div>
+      ${cls.length>0?`<div class="cal-badge" style="background:${isT?'rgba(255,255,255,.25)':'var(--accent)'}">${cls.length}</div>`:(sp?`<div class="cal-hint">🎉</div>`:'')}
+    </div>`;
+  }
+  const selCls=sched[ss]||[];
+  const lbl=getDL(selDate);
+  const wn=selCls[0]?.week;
+  return`
+    <div class="nav-arrows">
+      <button class="arr" id="prevMonth">‹</button>
+      <div class="nav-mid"><div class="nav-mid-title">${MONTHS[m]} ${y}</div></div>
+      <button class="arr" id="nextMonth">›</button>
+    </div>
+    <div class="cal-hdr-row">
+      ${DAY_HDRS.map(d=>`<div class="cal-hdr-cell">${d}</div>`).join('')}
+    </div>
+    <div class="cal-grid">${cells}</div>
+    <div style="font-size:11px;color:var(--text3);text-align:center;margin:10px 0 4px">Tap a date to see details</div>
+    <div class="card" style="margin-top:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-size:15px;font-weight:700">${selDate.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'})}</div>
+        ${wn?`<span class="badge">Week ${wn}</span>`:''}
+      </div>
+      ${lbl?`<div class="alert" style="background:#f59e0b15;border:1px solid #f59e0b40;color:var(--yellow);margin-bottom:10px">🎉 ${lbl.t}</div>`:''}
+      ${selCls.length===0?`<div style="text-align:center;color:var(--text3);padding:20px 0;font-size:14px">No classes on this day</div>`:selCls.map(c=>classCard(c,false,false)).join('')}
+    </div>`;
+}
+
+/* ── ATTENDANCE ── */
+function vAttendance(){
+  const myS=[...new Set(subjs)];
+  const stats={};myS.forEach(s=>{stats[s]={P:0,A:0,C:0,total:0};});
+  let tP=0,tA=0,tC=0,tAll=0;
+  RAW.forEach(([date,,subj,ses])=>{
+    if(!stats[subj])return;
+    const a=att(`${date}|${subj}|${ses}`);
+    stats[subj].total++;tAll++;
+    if(a==='P'){stats[subj].P++;tP++;}else if(a==='A'){stats[subj].A++;tA++;}else if(a==='C'){stats[subj].C++;tC++;}
+  });
+  const marked=tP+tA+tC,den=tP+tA;
+  const pct=den>0?Math.round(tP/den*100):null;
+  const pctCol=pct===null?'var(--text3)':pct>=85?'var(--green)':pct>=75?'var(--yellow)':'var(--red)';
+  const safe=pct!==null&&pct>=85?Math.max(0,Math.floor(tP/0.85)-den):0;
+  const needMore=den>0&&pct<85?Math.max(0,Math.ceil(0.85*den)-tP):0;
+  const recent=[];
+  RAW.forEach(([date,,subj,ses])=>{
+    if(!stats[subj])return;
+    const k=`${date}|${subj}|${ses}`,a=att(k);
+    if(a)recent.push({date,subj,ses,a});
+  });
+  recent.sort((a,b)=>b.date.localeCompare(a.date));
+
+  return`
+    <div style="font-size:20px;font-weight:800;margin-bottom:16px;letter-spacing:-.3px">Attendance Tracker</div>
+
+    <!-- Overall -->
+    <div class="att-overall">
+      <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Overall Attendance</div>
+      <div class="att-pct" style="color:${pctCol}">${pct!==null?pct+'%':'–'}</div>
+      <div class="att-pct-sub">${tP} Present &nbsp;·&nbsp; ${tA} Absent &nbsp;·&nbsp; ${tC} Cancelled</div>
+      <div class="att-prog">
+        <div class="att-prog-fill" style="width:${pct||0}%;background:${pctCol}"></div>
+      </div>
+      <div class="att-prog-marks">
+        <span>0%</span><span style="color:var(--yellow);font-weight:700">75%</span><span style="color:var(--green);font-weight:700">85% ✓</span><span>100%</span>
+      </div>
+    </div>
+
+    <!-- Alert -->
+    ${pct!==null?(pct<85
+      ?`<div class="alert" style="background:var(--red-dim);border:1px solid var(--red);color:var(--red);margin-bottom:12px">⚠️ Below 85% — need ${needMore} more present class${needMore===1?'':'es'}</div>`
+      :`<div class="alert" style="background:var(--green-dim);border:1px solid var(--green);color:var(--green);margin-bottom:12px">✅ On track — can miss ${safe} more class${safe===1?'':'es'} and stay ≥85%</div>`)
+    :''}
+
+    <!-- Mini stats -->
+    <div class="att-mini-row">
+      <div class="att-mini">
+        <div class="att-mini-lbl">Marked</div>
+        <div class="att-mini-n" style="color:var(--accent)">${marked}</div>
+        <div style="font-size:11px;color:var(--text3)">of ${tAll} total</div>
+      </div>
+      <div class="att-mini">
+        <div class="att-mini-lbl">Unmarked</div>
+        <div class="att-mini-n" style="color:var(--yellow)">${tAll-marked}</div>
+        <div style="font-size:11px;color:var(--text3)">pending</div>
+      </div>
+    </div>
+
+    <!-- Subject breakdown -->
+    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">Subject Breakdown</div>
+    ${myS.map(subj=>{
+      const s=ALL_SUBJECTS[subj],st=stats[subj];
+      const d2=st.P+st.A,p2=d2>0?Math.round(st.P/d2*100):null;
+      const col=p2===null?'var(--text3)':p2>=85?'var(--green)':p2>=75?'var(--yellow)':'var(--red)';
+      return`<div class="subj-row">
+        <div class="subj-top">
+          <div>
+            ${pill(subj)}
+            <div style="font-size:12px;color:var(--text3);margin-top:4px">${s.name}</div>
+          </div>
+          <div class="subj-pct" style="color:${col}">${p2!==null?p2+'%':'–'}</div>
+        </div>
+        <div class="subj-bar-bg"><div class="subj-bar-fill" style="width:${p2||0}%;background:${col}"></div></div>
+        <div class="subj-counts">
+          <span>✅ ${st.P} present</span>
+          <span>❌ ${st.A} absent</span>
+          <span>🔵 ${st.C} cancelled</span>
+        </div>
+      </div>`;
+    }).join('')}
+
+    <!-- Recent -->
+    <div class="card" style="margin-top:4px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px">Recent Activity</div>
+      ${recent.length===0
+        ?`<div style="text-align:center;color:var(--text3);padding:20px;font-size:13px">No attendance marked yet.<br>Go to <b>Daily</b> tab to mark.</div>`
+        :recent.slice(0,15).map(({date,subj,ses,a})=>{
+          const col=a==='P'?'var(--green)':a==='A'?'var(--red)':'var(--text3)';
+          return`<div class="recent-row">
+            <div style="display:flex;align-items:center;gap:8px">
+              ${pill(subj)}
+              <span style="font-size:12px;color:var(--text3)">${new Date(date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'})} · Ses ${ses}</span>
+            </div>
+            <span style="font-size:12px;font-weight:700;color:${col}">${a==='P'?'Present':a==='A'?'Absent':'Cancelled'}</span>
+          </div>`;
+        }).join('')}
+    </div>`;
+}
+
+/* ── ANALYTICS ── */
+function vAnalytics(){
+  let total=0,pS={},pD={Mon:0,Tue:0,Wed:0,Thu:0,Fri:0,Sat:0,Sun:0};
+  Object.entries(sched).forEach(([d,cls])=>{
+    total+=cls.length;
+    const dow=DAYS[new Date(d+'T00:00:00').getDay()];
+    pD[dow]=(pD[dow]||0)+cls.length;
+    cls.forEach(c=>{pS[c.subj]=(pS[c.subj]||0)+1;});
+  });
+  const top=Object.entries(pS).sort((a,b)=>b[1]-a[1])[0];
+  const bd=Object.entries(pD).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1])[0];
+  return`
+    <div style="font-size:20px;font-weight:800;margin-bottom:18px;letter-spacing:-.3px">Analytics</div>
+    <div class="ana-grid">
+      ${[{l:'Total Classes',v:total,i:'📚'},{l:'Total Hours',v:total*1.5+'h',i:'⏱'},{l:'Most Frequent',v:ALL_SUBJECTS[top?.[0]]?.short||'–',i:'🏆'},{l:'Busiest Day',v:bd?.[0]||'–',i:'🔥'}].map(x=>`
+      <div class="ana-box"><div class="ana-ico">${x.i}</div><div class="ana-n">${x.v}</div><div class="ana-lbl">${x.l}</div></div>`).join('')}
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:14px">Classes per Subject</div>
+      ${Object.entries(pS).sort((a,b)=>b[1]-a[1]).map(([subj,n])=>{
+        const s=ALL_SUBJECTS[subj],p=total>0?Math.round(n/total*100):0;
+        return`<div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <div style="display:flex;align-items:center;gap:6px">${pill(subj)}<span style="font-size:12px;color:var(--text3)">${s.name}</span></div>
+            <span style="font-size:12px;color:var(--text3);font-weight:600">${n} · ${p}%</span>
+          </div>
+          <div style="height:8px;background:var(--border);border-radius:8px;overflow:hidden">
+            <div style="height:8px;background:${s.color};width:${p}%;border-radius:8px;transition:width .5s"></div>
+          </div>
+        </div>`;}).join('')}
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:14px">Day-wise Distribution</div>
+      ${Object.entries(pD).map(([day,n])=>{
+        const mx=Math.max(...Object.values(pD)),p=mx>0?Math.round(n/mx*100):0;
+        return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="width:34px;font-size:12px;font-weight:700;color:var(--text3)">${day}</div>
+          <div style="flex:1;height:9px;background:var(--border);border-radius:8px;overflow:hidden">
+            <div style="height:9px;background:var(--accent);width:${n?p:0}%;border-radius:8px;transition:width .5s;opacity:${n?1:0}"></div>
+          </div>
+          <div style="width:24px;font-size:12px;color:${n?'var(--accent)':'var(--text3)'};font-weight:700;text-align:right">${n}</div>
+        </div>`;}).join('')}
+    </div>`;
+}
+
+/* ── ONBOARDING ── */
+function renderOnboard(){
+  if(obStep===1){
+    return`<div class="onboard">
+      <div class="ob-card">
+        <div class="ob-title">👋 Welcome!</div>
+        <div class="ob-sub">Set up your MBA Term IV timetable — it only takes a minute.</div>
+        <label class="ob-label">Your Name</label>
+        <input class="ob-input" id="obName" type="text" placeholder="Enter your full name" value="${tmpName}" style="margin-top:0;margin-bottom:20px"/>
+        <button class="ob-btn" id="obNext1" ${tmpName.trim()?'':'disabled'}>Continue →</button>
+      </div>
+    </div>`;
+  }
+  const multiH=Object.keys(CWS).map(c=>{
+    const sel=tmpSel[c],secs=CWS[c];
+    const info=sel?ALL_SUBJECTS[`${c}-${sel}`]:null,col=info?.color||'var(--accent)';
+    return`<div class="ob-chip ${sel?'sel':''}" data-course="${c}" style="${sel?`border-color:${col};background:${col}18;color:${col}`:''}">
+      <div class="ob-chip-title">${c}</div>
+      <div class="ob-chip-sub">${sel?'Section '+sel:secs.join(' / ')}</div>
+      ${sel?`<select class="sec-sel" id="osel-${c}" style="border-color:${col}">${secs.map(s=>`<option value="${s}" ${sel===s?'selected':''}>${s}</option>`).join('')}</select>`:''}
+    </div>`;
+  }).join('');
+  const singleH=SSC.map(c=>{
+    const s=ALL_SUBJECTS[c],isSel=tmpSel[c]==='yes';
+    return`<div class="ob-chip ${isSel?'sel':''}" data-single="${c}" style="${isSel?`border-color:${s.color};background:${s.color}18;color:${s.color}`:''}">
+      <div class="ob-chip-title">${c}</div>
+      <div class="ob-chip-sub">${s.name.substring(0,28)}${s.name.length>28?'…':''}</div>
+    </div>`;
+  }).join('');
+  const hasAny=Object.keys(tmpSel).length>0;
+  return`<div class="onboard">
+    <div class="ob-card" style="max-height:92vh;overflow-y:auto">
+      <div class="ob-title">📚 Your Subjects</div>
+      <div class="ob-sub">Select the courses you're enrolled in. Tap to choose a section.</div>
+      <div class="sec-lbl">Courses with Sections</div>
+      <div class="ob-grid" id="obMulti">${multiH}</div>
+      <div class="sec-lbl" style="margin-top:14px">Single-section Courses</div>
+      <div class="ob-grid" id="obSingle">${singleH}</div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="ob-btn sec" id="obBack" style="flex:.4">← Back</button>
+        <button class="ob-btn" id="obNext2" ${hasAny?'':'disabled'} style="flex:1">Let's Go →</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function bindOnboard(){
+  if(obStep===1){
+    const inp=document.getElementById('obName'),btn=document.getElementById('obNext1');
+    inp?.addEventListener('input',()=>{tmpName=inp.value;btn.disabled=!tmpName.trim();});
+    inp?.addEventListener('keydown',e=>{if(e.key==='Enter'&&tmpName.trim()){obStep=2;render();}});
+    btn?.addEventListener('click',()=>{if(tmpName.trim()){obStep=2;render();}});
+    return;
+  }
+  function reM(){
+    const g=document.getElementById('obMulti');if(!g)return;
+    g.innerHTML=Object.keys(CWS).map(c=>{
+      const sel=tmpSel[c],secs=CWS[c];
+      const info=sel?ALL_SUBJECTS[`${c}-${sel}`]:null,col=info?.color||'var(--accent)';
+      return`<div class="ob-chip ${sel?'sel':''}" data-course="${c}" style="${sel?`border-color:${col};background:${col}18;color:${col}`:''}">
+        <div class="ob-chip-title">${c}</div>
+        <div class="ob-chip-sub">${sel?'Section '+sel:secs.join(' / ')}</div>
+        ${sel?`<select class="sec-sel" id="osel-${c}" style="border-color:${col}">${secs.map(s=>`<option value="${s}" ${sel===s?'selected':''}>${s}</option>`).join('')}</select>`:''}
+      </div>`;
+    }).join('');
+    document.getElementById('obNext2').disabled=!Object.keys(tmpSel).length;
+    attM();
+  }
+  function reS(){
+    const g=document.getElementById('obSingle');if(!g)return;
+    g.innerHTML=SSC.map(c=>{
+      const s=ALL_SUBJECTS[c],isSel=tmpSel[c]==='yes';
+      return`<div class="ob-chip ${isSel?'sel':''}" data-single="${c}" style="${isSel?`border-color:${s.color};background:${s.color}18;color:${s.color}`:''}">
+        <div class="ob-chip-title">${c}</div>
+        <div class="ob-chip-sub">${s.name.substring(0,28)}${s.name.length>28?'…':''}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('obNext2').disabled=!Object.keys(tmpSel).length;
+    attS();
+  }
+  function attM(){
+    document.querySelectorAll('[data-course]').forEach(el=>{
+      el.addEventListener('click',e=>{
+        if(e.target.tagName==='SELECT'||e.target.tagName==='OPTION')return;
+        const c=el.dataset.course;
+        if(tmpSel[c])delete tmpSel[c];else tmpSel[c]=CWS[c][0];
+        reM();
+      });
+    });
+    document.querySelectorAll('[id^="osel-"]').forEach(s=>{
+      s.addEventListener('change',e=>{e.stopPropagation();tmpSel[e.target.id.replace('osel-','')]=e.target.value;});
+    });
+  }
+  function attS(){
+    document.querySelectorAll('[data-single]').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const c=el.dataset.single;
+        if(tmpSel[c])delete tmpSel[c];else tmpSel[c]='yes';
+        reS();
+      });
+    });
+  }
+  attM();attS();
+  document.getElementById('obBack')?.addEventListener('click',()=>{obStep=1;render();bindOnboard();});
+  document.getElementById('obNext2')?.addEventListener('click',()=>{
+    const res=[];
+    Object.entries(tmpSel).forEach(([c,v])=>res.push(v==='yes'?c:`${c}-${v}`));
+    name=tmpName.trim();subjs=res;
+    localStorage.setItem('studentName',name);localStorage.setItem('chosenSubjects',JSON.stringify(subjs));
+    buildSched();render();
+  });
+}
+
+/* ── EDIT PROFILE MODAL ── */
+function renderEditModal(){
+  const mH=Object.keys(CWS).map(c=>{
+    const sel=editSel[c],secs=CWS[c];
+    const info=sel?ALL_SUBJECTS[`${c}-${sel}`]:null,col=info?.color||'var(--accent)';
+    return`<div class="ob-chip ${sel?'sel':''}" data-ec="${c}" style="${sel?`border-color:${col};background:${col}18;color:${col}`:''}">
+      <div class="ob-chip-title">${c}</div>
+      <div class="ob-chip-sub">${sel?'Section '+sel:secs.join(' / ')}</div>
+      ${sel?`<select class="sec-sel" id="esel-${c}" style="border-color:${col}">${secs.map(s=>`<option value="${s}" ${sel===s?'selected':''}>${s}</option>`).join('')}</select>`:''}
+    </div>`;
+  }).join('');
+  const sH=SSC.map(c=>{
+    const s=ALL_SUBJECTS[c],isSel=editSel[c]==='yes';
+    return`<div class="ob-chip ${isSel?'sel':''}" data-es="${c}" style="${isSel?`border-color:${s.color};background:${s.color}18;color:${s.color}`:''}">
+      <div class="ob-chip-title">${c}</div>
+      <div class="ob-chip-sub">${s.name.substring(0,28)}${s.name.length>28?'…':''}</div>
+    </div>`;
+  }).join('');
+  return`<div class="overlay" id="editOverlay">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Edit Profile</div>
+      <div class="sheet-sub">Update your name or subject selection.</div>
+      <label class="ob-label">Your Name</label>
+      <input class="ob-input" id="editNameInp" value="${editName}" placeholder="Full name" style="margin-bottom:18px"/>
+      <div class="sec-lbl">Courses with Sections</div>
+      <div class="ob-grid" id="editMulti">${mH}</div>
+      <div class="sec-lbl" style="margin-top:14px">Single-section Courses</div>
+      <div class="ob-grid" id="editSingle">${sH}</div>
+      <div style="display:flex;gap:8px;margin-top:18px">
+        <button class="ob-btn sec" id="editCancel" style="flex:.4">Cancel</button>
+        <button class="ob-btn" id="editSave" style="flex:1">Save</button>
+      </div>
+    </div>
+  </div>`;
+}
+function bindEditModal(){
+  document.getElementById('editNameInp')?.addEventListener('input',e=>{editName=e.target.value;});
+  document.getElementById('editCancel')?.addEventListener('click',()=>{showEdit=false;render();});
+  document.getElementById('editOverlay')?.addEventListener('click',e=>{if(e.target.id==='editOverlay'){showEdit=false;render();}});
+  function reEM(){
+    const g=document.getElementById('editMulti');if(!g)return;
+    g.innerHTML=Object.keys(CWS).map(c=>{
+      const sel=editSel[c],secs=CWS[c];
+      const info=sel?ALL_SUBJECTS[`${c}-${sel}`]:null,col=info?.color||'var(--accent)';
+      return`<div class="ob-chip ${sel?'sel':''}" data-ec="${c}" style="${sel?`border-color:${col};background:${col}18;color:${col}`:''}">
+        <div class="ob-chip-title">${c}</div>
+        <div class="ob-chip-sub">${sel?'Section '+sel:secs.join(' / ')}</div>
+        ${sel?`<select class="sec-sel" id="esel-${c}" style="border-color:${col}">${secs.map(s=>`<option value="${s}" ${sel===s?'selected':''}>${s}</option>`).join('')}</select>`:''}
+      </div>`;
+    }).join('');
+    attEM();
+  }
+  function reES(){
+    const g=document.getElementById('editSingle');if(!g)return;
+    g.innerHTML=SSC.map(c=>{
+      const s=ALL_SUBJECTS[c],isSel=editSel[c]==='yes';
+      return`<div class="ob-chip ${isSel?'sel':''}" data-es="${c}" style="${isSel?`border-color:${s.color};background:${s.color}18;color:${s.color}`:''}">
+        <div class="ob-chip-title">${c}</div>
+        <div class="ob-chip-sub">${s.name.substring(0,28)}${s.name.length>28?'…':''}</div>
+      </div>`;
+    }).join('');
+    attES();
+  }
+  function attEM(){
+    document.querySelectorAll('[data-ec]').forEach(el=>{
+      el.addEventListener('click',e=>{
+        if(e.target.tagName==='SELECT'||e.target.tagName==='OPTION')return;
+        const c=el.dataset.ec;
+        if(editSel[c])delete editSel[c];else editSel[c]=CWS[c][0];
+        reEM();
+      });
+    });
+    document.querySelectorAll('[id^="esel-"]').forEach(s=>{
+      s.addEventListener('change',e=>{e.stopPropagation();editSel[e.target.id.replace('esel-','')]=e.target.value;});
+    });
+  }
+  function attES(){
+    document.querySelectorAll('[data-es]').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const c=el.dataset.es;
+        if(editSel[c])delete editSel[c];else editSel[c]='yes';
+        reES();
+      });
+    });
+  }
+  attEM();attES();
+  document.getElementById('editSave')?.addEventListener('click',()=>{
+    const n=editName.trim();if(!n)return;
+    const res=[];Object.entries(editSel).forEach(([c,v])=>res.push(v==='yes'?c:`${c}-${v}`));
+    if(!res.length)return;
+    name=n;subjs=res;
+    localStorage.setItem('studentName',name);localStorage.setItem('chosenSubjects',JSON.stringify(subjs));
+    buildSched();showEdit=false;render();
+  });
+}
+
+/* ── ADMIN ── */
+function renderAdmin(){
+  if(!adminIn){return`<div class="admin-wrap"><div class="admin-card">
+    <div class="admin-title">🔐 Admin Panel</div>
+    <div class="admin-sub">MBA Timetable — Admin Access</div>
+    <label class="ob-label" style="display:block;margin-bottom:6px">Password</label>
+    <input class="admin-input" id="apw" type="password" placeholder="Enter password"/>
+    <div id="apwErr" style="color:var(--red);font-size:12px;margin-bottom:8px;display:none">Incorrect password</div>
+    <button class="admin-btn" id="aLogin">Login →</button>
+    <button class="admin-btn sec" id="aBack" style="margin-top:4px">← Back to App</button>
+  </div></div>`;}
+  const ls=localStorage.getItem(LS_SYNC);
+  const live=isLive();
+  return`<div class="admin-wrap" style="justify-content:flex-start;padding-top:30px">
+    <div class="admin-card">
+      <div class="admin-title">⚙️ Admin Panel</div>
+      <div class="admin-sub">Logged in</div>
+      <div style="font-size:12px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);margin-bottom:12px;background:${live?'var(--green-dim)':'var(--yellow-dim)'}">
+        ${live?`✅ Live Sheet — Last synced: ${ls?new Date(ls).toLocaleString('en-IN'):'Unknown'}`:`⚠️ Using built-in fallback data`}
+      </div>
+      <label class="ob-label" style="display:block;margin-bottom:6px">Google Sheet CSV URL</label>
+      <input class="admin-input" id="aUrl" value="${adminUrl}" style="font-size:11px"/>
+      ${adminMsg?`<div class="sync-msg ${adminMsg.c}">${adminMsg.t}</div>`:''}
+      ${adminPrev?`<div style="margin-bottom:10px">
+        <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:6px">Preview (first 5 of ${adminPrev.length})</div>
+        <div style="overflow-x:auto;border-radius:8px;border:1px solid var(--border)">
+          <table class="preview-tbl"><thead><tr><th>Date</th><th>Wk</th><th>Subject</th><th>Ses</th><th>Room</th><th>Slot</th></tr></thead>
+          <tbody>${adminPrev.slice(0,5).map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td></tr>`).join('')}</tbody></table>
+        </div>
+        <button class="admin-btn" id="aConfirm" style="margin-top:8px;background:var(--green)">✅ Apply ${adminPrev.length} entries</button>
+        <button class="admin-btn sec" id="aCancelPrev">Cancel</button>
+      </div>`:''}
+      ${!adminPrev?`<button class="admin-btn" id="aFetch" ${adminSyncing?'disabled':''}>${adminSyncing?'<span class="spinner"></span>Fetching…':'🔄 Fetch & Preview'}</button>`:''}
+      <hr class="divider"/>
+      <label class="ob-label" style="display:block;margin-bottom:6px">Change Password</label>
+      <input class="admin-input" id="aNpw" type="password" placeholder="New password (min 6)"/>
+      <input class="admin-input" id="aCpw" type="password" placeholder="Confirm password"/>
+      <button class="admin-btn sec" id="aChPw">🔑 Update Password</button>
+      <div id="aPwMsg" style="font-size:12px;margin-top:4px;display:none"></div>
+      <hr class="divider"/>
+      <button class="admin-btn danger" id="aClear">🗑 Revert to Built-in Data</button>
+      <button class="admin-btn sec" id="aLogout" style="margin-top:6px">← Logout</button>
+    </div>
+  </div>`;
+}
+function bindAdmin(){
+  if(!adminIn){
+    const inp=document.getElementById('apw'),btn=document.getElementById('aLogin'),err=document.getElementById('apwErr');
+    document.getElementById('aBack')?.addEventListener('click',()=>{adminMode=false;render();});
+    const go=()=>{if(inp.value===getPW()){adminIn=true;adminMsg=null;render();}else{err.style.display='block';inp.value='';}};
+    btn?.addEventListener('click',go);inp?.addEventListener('keydown',e=>{if(e.key==='Enter')go();});return;
+  }
+  document.getElementById('aLogout')?.addEventListener('click',()=>{adminIn=false;adminMode=false;adminMsg=null;adminPrev=null;render();});
+  document.getElementById('aFetch')?.addEventListener('click',async()=>{
+    const u=document.getElementById('aUrl').value.trim();if(!u){adminMsg={c:'sync-err',t:'❌ Please enter a URL'};render();return;}
+    adminUrl=u;localStorage.setItem(LS_URL,u);adminSyncing=true;adminMsg={c:'sync-info',t:'<span class="spinner"></span>Fetching…'};adminPrev=null;render();bindAdmin();
+    try{
+      const r=await fetch(u+'&t='+Date.now());if(!r.ok)throw new Error('HTTP '+r.status);
+      const txt=await r.text();const lines=txt.trim().split('\n');
+      if(lines.length<2)throw new Error('No rows');
+      const hdrs=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/"/g,''));
+      const rows=[];
+      for(let i=1;i<lines.length;i++){
+        const cols=lines[i].split(',').map(c=>c.trim().replace(/"/g,''));
+        if(cols.length<hdrs.length)continue;
+        const o={};hdrs.forEach((h,idx)=>o[h]=cols[idx]||'');
+        if(!o.date||!o.subject)continue;
+        rows.push([o.date,parseInt(o.week)||1,o.subject,o.session||'1',o.room||'TBD',parseInt(o.slot)||0]);
+      }
+      if(!rows.length)throw new Error('No valid rows');
+      adminPrev=rows;adminSyncing=false;adminMsg={c:'sync-ok',t:`✅ Fetched ${rows.length} entries. Review below.`};
+    }catch(e){adminSyncing=false;adminMsg={c:'sync-err',t:`❌ ${e.message}`};}
+    render();bindAdmin();
+  });
+  document.getElementById('aConfirm')?.addEventListener('click',()=>{
+    if(!adminPrev)return;
+    localStorage.setItem(LS_TT,JSON.stringify(adminPrev));localStorage.setItem(LS_SYNC,new Date().toISOString());
+    RAW=adminPrev;buildSched();adminPrev=null;adminMsg={c:'sync-ok',t:`✅ Applied! ${RAW.length} entries live.`};render();bindAdmin();
+  });
+  document.getElementById('aCancelPrev')?.addEventListener('click',()=>{adminPrev=null;adminMsg=null;render();bindAdmin();});
+  document.getElementById('aClear')?.addEventListener('click',()=>{
+    if(confirm('Revert to built-in data?')){localStorage.removeItem(LS_TT);localStorage.removeItem(LS_SYNC);RAW=FALLBACK;buildSched();adminMsg={c:'sync-info',t:'ℹ️ Reverted to built-in data.'};adminPrev=null;render();bindAdmin();}
+  });
+  document.getElementById('aChPw')?.addEventListener('click',()=>{
+    const np=document.getElementById('aNpw').value,cp=document.getElementById('aCpw').value,msg=document.getElementById('aPwMsg');
+    if(np.length<6){msg.style.display='block';msg.style.color='var(--red)';msg.textContent='Min 6 characters.';return;}
+    if(np!==cp){msg.style.display='block';msg.style.color='var(--red)';msg.textContent='Passwords do not match.';return;}
+    localStorage.setItem(LS_PW,np);msg.style.display='block';msg.style.color='var(--green)';msg.textContent='✅ Updated!';
+    document.getElementById('aNpw').value='';document.getElementById('aCpw').value='';
+  });
+}
+
+/* ── EVENTS ── */
+function bindEvents(){
+  document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{view=b.dataset.view;render();}));
+  document.getElementById('themeBtn')?.addEventListener('click',()=>{dark=!dark;localStorage.setItem('theme',dark?'dark':'light');render();});
+  document.getElementById('editBtn')?.addEventListener('click',()=>{
+    editName=name;editSel={};
+    subjs.forEach(k=>{const s=ALL_SUBJECTS[k];if(!s)return;if(s.section)editSel[s.course]=s.section;else editSel[s.course]='yes';});
+    showEdit=true;render();bindEditModal();
+  });
+  document.getElementById('gearBtn')?.addEventListener('click',()=>{
+    gearN++;clearTimeout(gearT);
+    if(gearN>=5){gearN=0;adminMode=true;adminIn=false;render();return;}
+    gearT=setTimeout(()=>{gearN=0;},700);
+  });
+  document.querySelectorAll('[data-date]').forEach(el=>el.addEventListener('click',()=>{selDate=new Date(el.dataset.date+'T00:00:00');view='daily';render();}));
+  document.querySelectorAll('[data-goto-date]').forEach(el=>el.addEventListener('click',()=>{selDate=new Date(el.getAttribute('data-goto-date')+'T00:00:00');view='daily';render();}));
+  document.getElementById('prevDay')?.addEventListener('click',()=>{const d=new Date(selDate);d.setDate(d.getDate()-1);selDate=d;render();});
+  document.getElementById('nextDay')?.addEventListener('click',()=>{const d=new Date(selDate);d.setDate(d.getDate()+1);selDate=d;render();});
+  document.getElementById('goToday')?.addEventListener('click',()=>{selDate=new Date();render();});
+  document.getElementById('prevWeek')?.addEventListener('click',()=>{const d=new Date(wkBase);d.setDate(d.getDate()-7);wkBase=d;render();});
+  document.getElementById('nextWeek')?.addEventListener('click',()=>{const d=new Date(wkBase);d.setDate(d.getDate()+7);wkBase=d;render();});
+  document.getElementById('goThisWeek')?.addEventListener('click',()=>{wkBase=new Date();render();});
+  document.getElementById('prevMonth')?.addEventListener('click',()=>{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()-1,1);render();});
+  document.getElementById('nextMonth')?.addEventListener('click',()=>{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+1,1);render();});
+  document.querySelectorAll('.att-btn').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation();const k=b.dataset.key,v=b.dataset.val,cur=att(k);
+    if(cur===v)localStorage.removeItem('att_'+k);else localStorage.setItem('att_'+k,v);render();
+  }));
+  document.querySelectorAll('.clear-btn').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation();localStorage.removeItem('att_'+b.dataset.key);render();
+  }));
+  if(showEdit)bindEditModal();
+}
+
+/* ── PWA ── */
+(function(){
+  function mkIcon(sz){
+    const c=document.createElement('canvas');c.width=c.height=sz;
+    const ctx=c.getContext('2d');ctx.fillStyle='#6c6ff5';
+    const r=sz*.2;ctx.beginPath();ctx.moveTo(r,0);ctx.lineTo(sz-r,0);ctx.quadraticCurveTo(sz,0,sz,r);ctx.lineTo(sz,sz-r);ctx.quadraticCurveTo(sz,sz,sz-r,sz);ctx.lineTo(r,sz);ctx.quadraticCurveTo(0,sz,0,sz-r);ctx.lineTo(0,r);ctx.quadraticCurveTo(0,0,r,0);ctx.fill();
+    ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`bold ${sz*.26}px sans-serif`;ctx.fillText('TT',sz/2,sz*.4);
+    ctx.font=`bold ${sz*.1}px sans-serif`;ctx.fillText('PLANNER',sz/2,sz*.62);
+    return c.toDataURL('image/png');
+  }
+  const i192=mkIcon(192),i512=mkIcon(512);
+  const mf={name:'MBA Timetable',short_name:'TT Planner',start_url:'./',display:'standalone',background_color:'#0d0f1a',theme_color:'#6c6ff5',icons:[{src:i192,sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:i512,sizes:'512x512',type:'image/png',purpose:'any maskable'}]};
+  const bl=new Blob([JSON.stringify(mf)],{type:'application/json'});
+  const lk=document.createElement('link');lk.rel='manifest';lk.href=URL.createObjectURL(bl);document.head.appendChild(lk);
+  const al=document.createElement('link');al.rel='apple-touch-icon';al.href=i192;document.head.appendChild(al);
+  if('serviceWorker' in navigator){
+    const sw=`const C='mba-tt-v5';self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));});`;
     navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
   }
 })();
